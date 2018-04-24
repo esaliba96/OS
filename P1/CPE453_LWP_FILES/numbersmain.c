@@ -60,6 +60,7 @@ int main(int argc, char *argv[]){
   }
 
   lwp_start();                     /* returns when the last lwp exits */
+  lwp_start();                     /* returns when the last lwp exits */
 
   printf("Back from LWPS.\n");
   return 0;
@@ -72,6 +73,9 @@ static void indentnum(void *num) {
   ptr_int_t howfar,i;
 
   howfar=(ptr_int_t)num;              /* interpret num as an integer */
+  if (howfar == 3) {
+    lwp_stop();
+  }
   for(i=0;i<howfar;i++){
     printf("%*"PTR_INT_T_FMT"\n",(int)howfar*5,howfar);
     lwp_yield();                /* let another have a turn */

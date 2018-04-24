@@ -35,9 +35,6 @@ typedef struct context_st {
  *   (Not really.  A better way would be to have the user supply a comparison
  *    function, but that would make the scheduler much more complicated.)
  */
-extern lwp_context lwp_ptable[];/* the process table           */
-extern int lwp_procs;           /* the current number of LWPs  */
-extern int lwp_running;         /* the index of the currently running LWP */
 
 
 typedef void (*lwpfun)(void *); /* type for lwp function */

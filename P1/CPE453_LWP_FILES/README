@@ -1,0 +1,3 @@
+Elie Saliba
+
+Our threading library does not implement synchronization in order to avoid race conditions. This library could be improved by adding functionality to lock and unlock mutexes as well as implementing a better default scheduling function than round robin. The API could allow the user to use differenet flags that could be used to implement a pre-set scheduler. 

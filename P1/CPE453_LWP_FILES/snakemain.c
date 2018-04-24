@@ -35,7 +35,7 @@
 #include "lwp.h"
 
 #define MAXSNAKES  100
-#define INITIALSTACK 2048
+#define INITIALSTACK 8192
 
 typedef void (*sigfun)(int signum);
 
