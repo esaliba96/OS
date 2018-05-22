@@ -1,0 +1,10 @@
+Elie Saliba
+
+1. SRJN deliver the same turnaround time as FIFO in case the workloads have equal burst times and/or the arrival times are very disperse with increasing burst times. Every time a new job comes in, the remaining time of the previous job will be smaller therefore the previous job will terminate before the next job starts.
+
+2. SRJN and RR will have the same turnaround in case the quantum is larger than any job and the jobs arrive in an increasing order.
+
+3. With SRJN, as the jobs lengths increase, the response time increases as well.
+
+4. As quantum increases, the response time will increase as well. Jobs will have to wait longer before they can be processed. An equation that demonstrates is W = q(n-1) where W is the response time. Q the number of processes and n number or jobs.
+

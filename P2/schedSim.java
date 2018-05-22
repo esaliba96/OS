@@ -11,44 +11,57 @@ public class schedSim {
     }
 
     static void parseArgs(String[] args) {
-        if (args.length == 0) {
+        if (args[0].length() == 0) {
             System.out.println("Format should be: schedSim <job-file.txt> -p <ALGORITHM> -q <QUANTUM>");
             System.exit(0);
         }
 
         parseFile(args[0]);
+        String flag = args[1];
 
-        if (args[1].equals("-p")) {
-            checkArgs(args, 2, 3);
-        } else if (args[3].equals("-p")) {
-            checkArgs(args, 4, 1);
+	if (flag.length() == 0) {
+            fifo();
         }
 
-      //  System.out.println(jobs.toString());
-    }
-
-    static void checkArgs(String[] args, int p_index, int q_index) {
-        switch (args[p_index]) {
-            case "SRJN":
-                srjn();
-                break;
-            case "FIFO":
-                fifo();
-                break;
-            case "RR":
-                if (args.length > 3 && args[q_index].equals("-q")) {
-                    rr(Integer.valueOf(args[q_index + 1]));
-                } else {
-                    rr(1);
+        if (flag.equals("-p")) {
+            checkArgs(args, 2, 3);
+        } else {
+            try {
+                if (args[3].equals("-p")) {
+                    checkArgs(args, 4, 2);
                 }
-                break;
-            default:
+            } catch (Exception e) {
                 fifo();
-                break;
+            }
         }
         turnaround_time();
         printJobs();
         printAverage();
+    }
+
+    static void checkArgs(String[] args, int p_index, int q_index) {
+        try {
+            switch (args[p_index]) {
+                case "SRJN":
+                    srjn();
+                    break;
+                case "FIFO":
+                    fifo();
+                    break;
+                case "RR":
+                    if (args[q_index].equals("-q")) {
+                        rr(Integer.valueOf(args[q_index + 1]));
+                    } else {
+                        rr(1);
+                    }
+                    break;
+                default:
+                    fifo();
+                    break;
+            }
+        } catch (Exception e) {
+            fifo();
+        }
     }
 
     static void parseFile(String f) {
@@ -75,42 +88,33 @@ public class schedSim {
 
     static void srjn() {
         int totalTime = 0, completeJobs = 0, minmum_burst = Integer.MAX_VALUE;
-        int shortestJob = 0, finish;
-        boolean changed = false;
+        int shortestJob = 0;
 
         while (completeJobs != jobs.size()) {
             for (Job j : jobs) {
                 if (j.arrival <= totalTime && j.remaining_time < minmum_burst && j.remaining_time > 0) {
-                    minmum_burst = j.burst;
+                    minmum_burst = j.remaining_time;
                     shortestJob = j.number;
-                    changed = true;
                 }
             }
+            totalTime++;
 
-            if (!changed) {
-                totalTime++;
-            }
-
-            minmum_burst = --jobs.get(shortestJob).remaining_time;
-
-            if (minmum_burst == 0) {
+            jobs.get(shortestJob).remaining_time -= 1;
+            minmum_burst = jobs.get(shortestJob).remaining_time;
+            if (minmum_burst <= 0) {
                 minmum_burst = Integer.MAX_VALUE;
                 completeJobs++;
-                finish = totalTime + 1;
-                jobs.get(shortestJob).wait = finish - jobs.get(shortestJob).burst - jobs.get(shortestJob).arrival;
+                jobs.get(shortestJob).wait = totalTime - jobs.get(shortestJob).burst - jobs.get(shortestJob).arrival;
             }
-            totalTime++;
         }
     }
 
     static void rr(int q) {
-        int totalTime = 0;
-        while (true) {
-            boolean done = true;
-
+        int totalTime = 0, complete = 0;
+        while (complete != jobs.size()) {
             for (Job j : jobs) {
-                if (j.remaining_time > 0) {
-                    done = false;
+
+                if (j.remaining_time > 0 && j.arrival <= totalTime) {
                     if (j.remaining_time > q) {
                         totalTime += q;
                         j.remaining_time -= q;
@@ -118,12 +122,9 @@ public class schedSim {
                         totalTime += j.remaining_time;
                         j.wait = totalTime - j.burst - j.arrival;
                         j.remaining_time = 0;
+                        complete++;
                     }
                 }
-            }
-
-            if (done) {
-                break;
             }
         }
     }
@@ -185,3 +186,4 @@ public class schedSim {
         }
     }
 }
+
