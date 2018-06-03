@@ -11,6 +11,11 @@
 #include <string.h>
 #include <strings.h>
 
+
+#define NBYTES_ERR -5
+#define ERR_ACCESS_FILE -6
+#define ERR_RESIZE -4
+
 int openDisk(char *filename, int nBytes);
 int readBlock(int disk, int bNum, void *block);
 int writeBlock(int disk, int bNum, void *block);
