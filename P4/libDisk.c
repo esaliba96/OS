@@ -1,7 +1,6 @@
 #include "libDisk.h"
 #include "tinyFS.h"
 
-
 int openDisk(char *filename, int nBytes) {
 	int fd;
 
@@ -23,10 +22,10 @@ int openDisk(char *filename, int nBytes) {
 }
 
 int readBlock(int disk, int bNum, void *block) {
-	if (lseek(fd, bNum * BLOCKSIZE, SEEK_SET) == -1) {
+	if (lseek(disk, bNum * BLOCKSIZE, SEEK_SET) == -1) {
 		return -1;
 	}
-	if (read(fd, block, BLOCKSIZE) == -1) {
+	if (read(disk, block, BLOCKSIZE) == -1) {
 		return -1;
 	} 
 
@@ -34,10 +33,10 @@ int readBlock(int disk, int bNum, void *block) {
 }
 
 int writeBlock(int disk, int bNum, void *block) {
-	if (lseek(fd, bNum * BLOCKSIZE, SEEK_SET) == -1) {
+	if (lseek(disk, bNum * BLOCKSIZE, SEEK_SET) == -1) {
 		return -1;
 	}
-	if (write(fd, block, BLOCKSIZE) == -1) {
+	if (write(disk, block, BLOCKSIZE) == -1) {
 		return -1;
 	} 
 
@@ -45,6 +44,5 @@ int writeBlock(int disk, int bNum, void *block) {
 }
 
 void closeDisk(int disk) {
-	int fd = disk; 
-	close(fd);
+	close(disk);
 }
