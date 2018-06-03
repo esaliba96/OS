@@ -5,17 +5,17 @@ int openDisk(char *filename, int nBytes) {
 	int fd;
 
 	if (nBytes % BLOCKSIZE != 0) {
-		return NBYTES_ERR
+		return NBYTES_ERR;
 	}
 	if (nBytes == 0 && access(filename, F_OK) == -1) {
-		return ERR_ACCESS_FILE
+		return ERR_ACCESS_FILE;
 	}
 	if ((fd = open(filename, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH)) == -1) {
-		return -1
+		return -1;
 	}
 	if (nBytes > 0 && ftruncate(fd, nBytes) == -1) {
 		close(fd);
-		return ERR_RESIZE	
+		return ERR_RESIZE;	
 	}
 
 	return fd;
