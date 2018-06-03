@@ -10,7 +10,7 @@ int openDisk(char *filename, int nBytes) {
 	if (nBytes == 0 && access(filename, F_OK) == -1) {
 		return ERR_ACCESS_FILE
 	}
-	if ((fd = open(filename, O_RDWR | O_CREAT, S_IRUSR, S_IWUSR, S_IRGRP, S_IWGRP, S_IROTH)) == -1) {
+	if ((fd = open(filename, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH)) == -1) {
 		return -1
 	}
 	if (nBytes > 0 && ftruncate(fd, nBytes) == -1) {
