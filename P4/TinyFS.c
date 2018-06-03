@@ -32,6 +32,7 @@ int tfs_mkfs(char *filename, int nBytes){
 		write(fs,init_block.buffer,BLOCKSIZE);
 	}
 	close(fs);
+	return 0;
 
 }
 
