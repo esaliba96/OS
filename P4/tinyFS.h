@@ -1,5 +1,5 @@
-#ifndef _TinyFS_H_
-#define _TinyFS_
+#ifndef _tinyFS_H_
+#define _tinyFS_H
 
 #include <stdio.h>
 #include <stdint.h>
@@ -11,10 +11,13 @@
 #include <fcntl.h>
 #include <string.h>
 #include <strings.h>
+#include "libDisk.h"
 
 #define BLOCKSIZE 256
 #define DEFAULT_DISK_SIZE 10240 
-#define DEFAULT_DISK_NAME “tinyFSDisk”   
+#define DEFAULT_DISK_NAME “tinyFSDisk” 
+
+int diskNO; 
 typedef int fileDescriptor;
 
 typedef struct block{
@@ -24,6 +27,7 @@ typedef struct block{
 
 int tfs_mkfs(char *filename, int nBytes);
 block init_blocks(int type);
+int verify_fs(void);
 int tfs_mount(char *filename);
 int tfs_unmount(void);
 int tfs_openFile(char *name);

@@ -1,5 +1,5 @@
-#ifndef _FILE_H_
-#define _FILE_H_
+#ifndef _libDisk_H_
+#define _libDisk_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +15,7 @@
 #define NBYTES_ERR -5
 #define ERR_ACCESS_FILE -6
 #define ERR_RESIZE -4
+#define BLOCKSIZE 256
 
 int openDisk(char *filename, int nBytes);
 int readBlock(int disk, int bNum, void *block);

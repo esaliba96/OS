@@ -1,4 +1,4 @@
-#include "TinyFS.h"
+#include "tinyFS.h"
 
 
 int tfs_mkfs(char *filename, int nBytes){
@@ -11,29 +11,67 @@ int tfs_mkfs(char *filename, int nBytes){
 	block block_list[num_blocks];
 
 	
-	printf("%i\n",num_blocks);
+	//printf("%i\n",num_blocks);
 	//Initialize file system with all zeroes
-	fs = open(filename, O_CREAT | O_RDWR | S_IRUSR);
-	if(fs == -1){
+	fs = openDisk(filename,nBytes);
+	if(fs == NBYTES_ERR){
+		printf("Invalid Filesystem System Size, must be divisible by 256\n");
 		return -1; //unable to open and configure file
+	} else if(fs == ERR_ACCESS_FILE){
+		printf("Unable to access file %s\n", filename);
+		return -1;
+	} else if(fs == ERR_RESIZE){
+		printf("Unable to truncate to filesystem length\n");
+		return -1;
 	}
-	for(i = 0; i<nBytes; i++){
-		if(write(fs,&init,1) == -1){
-			return -2; //invalid space requirements
-		}	
-	}
+
 	for(i=0;i<num_blocks;i++){
-		if(i>0 && i<3){
-			init_block = init_blocks(i);
+		if(i<3){
+			init_block = init_blocks(i+1);
+			if(i == 0){
+				init_block.buffer[4] = num_blocks - 2;
+			}
 		} else{
-			init_block = init_blocks(0);
+			init_block = init_blocks(i+1);
 		}
-		lseek(fs,i*BLOCKSIZE,SEEK_SET);
-		write(fs,init_block.buffer,BLOCKSIZE);
+		if(writeBlock(fs,i,&init_block) == -1){
+			printf("Disk Write Error\n");
+			return -1;
+		}
 	}
-	close(fs);
+	closeDisk(fs);
 	return 0;
 
+}
+
+int tfs_mount(char *filename){
+	//initialize file descriptor memory here
+	diskNO = openDisk(filename,0);
+	if(verify_fs() == -1){
+		return -1;
+	}
+	return diskNO;
+}
+
+int tfo_unmount(void){
+	//force close all open file descriptors
+	closeDisk(diskNO);
+	return 0;
+}
+
+int verify_fs(void){
+	block to_verify;
+	int i = 0;
+	int test=0;
+	test = readBlock(diskNO,i++,&to_verify);
+	int end = to_verify.buffer[4];
+	while(i<end){
+		test = readBlock(diskNO,i++,&to_verify);
+		if(to_verify.buffer[1] != 0x45){
+			return -1;
+		}
+	}
+	return 0;
 }
 
 block init_blocks(int type){
@@ -58,6 +96,9 @@ block init_blocks(int type){
 }
 
 int main(){
+	int fs;
 	tfs_mkfs("temp",10240);
+	printf("%i\n",tfs_mount("temp"));
+	printf("%i\n",tfo_unmount());
 	return 0;
 }

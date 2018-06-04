@@ -1,5 +1,4 @@
 #include "libDisk.h"
-#include "tinyFS.h"
 
 int openDisk(char *filename, int nBytes) {
 	int fd;
