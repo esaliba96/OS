@@ -181,13 +181,10 @@ int newFile(char *name){
 	int err;
 	superblock root;
 	freeblock for_inode;
-	freeblock for_file;
 	inodeblock new_block;
 	inodeblock last_block;
-	fileblock new_file_block;
 
 	uint8_t inode_block_no;
-	uint8_t file_block_no;
 	uint8_t current_last_inode = locateLastInode();
 
 	if(readBlock(diskNO, SUPERBLOCKADDR, &root) == EREAD){ // read superblock
@@ -199,22 +196,15 @@ int newFile(char *name){
 	if(root.free_block_count < 2){ // check available mem
 		return EOUTOFMEM;
 	}
-	if(readBlock(diskNO, root.free_block_pointer, &for_inode) == EREAD){ // readblock for inoide
+	if(readBlock(diskNO, root.free_block_pointer, &for_inode) == EREAD){ // readblock for inode
 		return EINVALID;
 	}
 	inode_block_no = root.free_block_pointer; // grab inode block number
 	root.free_block_pointer = for_inode.next_block; // update freeblockpointer
-	
-	if(readBlock(diskNO, root.free_block_pointer, &for_file) == EREAD){ //readblock for file
-		return EINVALID;
-	}
-	file_block_no = root.free_block_pointer; //grab file block number
-	root.free_block_pointer = for_file.next_block; //update freeblock pointer
 
 	last_block.next_inode = inode_block_no; // update the current last inode for write
-	new_block = newInode(name,file_block_no); ///build new inode for write
-	new_file_block = newFileBlock(0); // build new file for write
-	root.free_block_count -=2;
+	new_block = newInode(name,0); ///build new inode for write
+	root.free_block_count -=1;
 
 	if(writeBlock(diskNO, SUPERBLOCKADDR, &root) == -1){
 			printf("Disk Write Error\n");
@@ -225,10 +215,6 @@ int newFile(char *name){
 			return EWRITE;
 	}
 	if(writeBlock(diskNO, inode_block_no, &new_block) == -1){
-			printf("Disk Write Error\n");
-			return EWRITE;
-	}
-	if(writeBlock(diskNO, file_block_no, &new_file_block) == -1){
 			printf("Disk Write Error\n");
 			return EWRITE;
 	}
