@@ -89,7 +89,7 @@ int tfs_readByte(fileDescriptor FD, char *buffer);
 int locateFile(char *name);
 int newFile(char *name);
 uint8_t locateLastInode();
-fileblock newFileBlock();
+fileblock newFileBlock(uint8_t next_block_offset);
 inodeblock newInode(char *name, uint8_t fp);
 int tfs_seek(fileDescriptor FD, int offset);
 fdNode* create(int data, fdNode* next, uint8_t blockNbr);

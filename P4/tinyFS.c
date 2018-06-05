@@ -207,7 +207,7 @@ int newFile(char *name){
 
 	last_block.next_inode = inode_block_no; // update the current last inode for write
 	new_block = newInode(name,file_block_no); ///build new inode for write
-	new_file_block = newFileBlock(); // build new file for write
+	new_file_block = newFileBlock(0); // build new file for write
 
 	//need to write root, new last inode, new block and new file block
 
@@ -227,12 +227,13 @@ inodeblock newInode(char *name, uint8_t fp){
 
  }
 
-fileblock newFileBlock(){
+fileblock newFileBlock(uint8_t next_block_offset){
 	fileblock to_return;
 	memset(&to_return,0,BLOCKSIZE);
 	to_return.blocktype = 0x03;
 	to_return.magic_number = 0x45;
-	to_return.next_block = 0x00;
+	to_return.next_block = next_block_offset;
+	return to_return;
 }
 
 uint8_t locateLastInode(){
@@ -242,6 +243,7 @@ uint8_t locateLastInode(){
 	uint8_t block_no;
 
 	err = readBlock(diskNO, SUPERBLOCKADDR, &root);
+
 	block_no = root.root_inode;
 	err = readBlock(diskNO, block_no, &searcher);
 	while(searcher.next_inode != 0x00){
