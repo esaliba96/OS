@@ -316,6 +316,12 @@ int tfs_closeFile(fileDescriptor FD){
 }
 
 int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
+	superblock root;
+	inodeblock inode;
+	int free_blocks;
+	int block_nbr;
+	int free;
+
 	if (!containsFD(head, FD)) {
 		return EFD;
 	}
@@ -326,31 +332,31 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 
 	block b;
 
-	if (readBlock(diskNO, SUPERBLOCKADDR, &b) == -1) {
+	if (readBlock(diskNO, SUPERBLOCKADDR, &root) == -1) {
 		return EREAD;
 	}
 
-	superblock* s = (superblock*)(b.buffer);
-	int free_blocks = s->free_block_count;
-	int block_nbr = getBlockNbr(head, FD);
+	free_blocks = root.free_block_count;
+	block_nbr = getBlockNbr(head, FD);
+	
 	printf("block nbr %d\n", block_nbr);
-	int free = s->free_block_pointer;
+	
+	free = root.free_block_pointer;
 	printf("block %d\n", free);
 
-	if (readBlock(diskNO, block_nbr, &b) == -1) {
+	if (readBlock(diskNO, block_nbr, &inode) == -1) {
 		return EREAD;
 	} 
 
-	inodeblock* inode = (inodeblock*)(b.buffer);
-	inode->file_pointer = free;
-	printf("inode %d\n", inode->file_pointer);
+	inode.file_pointer = free;
+	printf("inode %d\n", inode.file_pointer);
 
 	if (writeBlock(diskNO, block_nbr, &inode) == 1) {
 		printf("error writing in tfs_writeFile\n");
 		return EWRITE;
 	}
 
-	int freeMem = inode->file_size % BLOCKSIZE + free_blocks * BLOCKSIZE;
+	int freeMem = inode.file_size % BLOCKSIZE + free_blocks * BLOCKSIZE;
 
 	if (size > freeMem) {
 		return EOUTOFMEM;
@@ -366,7 +372,7 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 
 	getFreeBlocks(blocksNeeded, free, free_blocks);
 
-	printf("inode %d\n", inode->file_size);
+	printf("inode %d\n", inode.file_size);
 
 	return SUCCESS;
 }
