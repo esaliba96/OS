@@ -1,6 +1,8 @@
 #include "tinyFS.h"
 
-fdNode* create(int data, fdNode* next) {
+fdNode* head = NULL;
+
+fdNode* create(int data, fdNode* next, uint8_t blockNbr) {
     fdNode* new_node = (fdNode*)malloc(sizeof(fdNode));
     
     if(new_node == NULL) {
@@ -9,33 +11,46 @@ fdNode* create(int data, fdNode* next) {
     }
     new_node->data = data;
     new_node->next = next;
+    new_node->blockNbr = blockNbr;
  
     return new_node;
 }
 
-fdNode* add(fdNode* head, int data) {
- 	fdNode* new_node = create(data,head);
+fdNode* add(fdNode* head, int data, uint8_t blockNbr) {
+ 	fdNode* new_node = create(data, head, blockNbr);
     head = new_node;
     
     return head;
 }
 
-void removeNode(fdNode* head, int data) {
+int removeNode(fdNode* head, int data) {
 	fdNode *curr, *prev;
   	prev = NULL;
 
   	for (curr = head; curr != NULL; prev = curr, curr = curr->next) {
+	    if (curr->data == data) {  
+	    	if (prev == NULL) {
+	        	head = curr->next;
+	      	} else {
+	        	prev->next = curr->next;
+	      	}
+			free(curr);
+	     	return SUCCESS;
+	    }
+  	}
 
-    if (curr->data == data) {  
-    	if (prev == NULL) {
-        	head = curr->next;
-      	} else {
-        	prev->next = curr->next;
-      	}
-		free(curr);
-     	return;
-    }
-  }
+  	return FAILURE;
+}
+
+int containsFD(fdNode* head, int fd) {
+	while(head != NULL) {
+//		printf("%d\n", head->data);;
+		if (head->data == fd) {
+			return 1;
+		} 
+		head = head->next;
+	}
+	return 0;
 }
 
 int tfs_mkfs(char *filename, int nBytes){
@@ -138,105 +153,38 @@ int main(){
 	//printf("%i\n",tfs_mount("temp"));
 	//printf("%i\n",tfo_unmount());
 
-	fdNode* head = NULL;
+	
 
-	head = add(head, 1);
-	head = add(head, 2);
-	head = add(head, 3);
-	removeNode(head, 2);
-	head = add(head, 4);
-	head = add(head, 5);
-	head = add(head, 6);
-	removeNode(head, 1);
-
+	head = add(head, 1, 7);
+	head = add(head, 2, 8);
+	head = add(head, 3, 4);
+	head = add(head, 4, 42);
+	head = add(head, 5, 42);
+	head = add(head, 6, 32);
+	
 	while (head) {
-		printf("%d\n", head->data);
+		printf("%d\n", head->blockNbr);
 		head = head->next;
 	}
+
+	printf("contains %d\n", containsFD(head, 34));
 	return 0;
 }
 
-int tfs_mkfs(char *filename, int nBytes){
-	// uint8_t init= 0x0;
-	// int fs;
-	// int i;
-	// int check;
-	// int num_blocks = nBytes/BLOCKSIZE;
-	// block init_block;
-	// block block_list[num_blocks];
-
-	
-	// //printf("%i\n",num_blocks);
-	// //Initialize file system with all zeroes
-	// fs = openDisk(filename,nBytes);
-	// if(fs == NBYTES_ERR){
-	// 	printf("Invalid Filesystem System Size, must be divisible by 256\n");
-	// 	return -1; //unable to open and configure file
-	// } else if(fs == ERR_ACCESS_FILE){
-	// 	printf("Unable to access file %s\n", filename);
-	// 	return -1;
-	// } else if(fs == ERR_RESIZE){
-	// 	printf("Unable to truncate to filesystem length\n");
-	// 	return -1;
-	// }
-
-	// for(i=0;i<num_blocks;i++){
-	// 	if(i<3){
-	// 		init_block = init_blocks(i+1);
-	// 		if(i == 0){
-	// 			init_block.buffer[4] = num_blocks - 2;
-	// 		}
-	// 	} else{
-	// 		init_block = init_blocks(i+1);
-	// 	}
-	// 	if(writeBlock(fs,i,&init_block) == -1){
-	// 		printf("Disk Write Error\n");
-	// 		return -1;
-	// 	}
-	// }
-	// closeDisk(fs);
-	// return 0;
+int tfs_closeFile(fileDescriptor FD){
+	if (removeNode(head, FD)) {
+		return SUCCESS;
+	}
+	return EFD;
 }
 
-int tfs_mkfs(char *filename, int nBytes){
-	uint8_t init= 0x0;
-	int fs;
-	int i;
-	int check;
-	int num_blocks = nBytes/BLOCKSIZE;
-	block init_block;
-	block block_list[num_blocks];
-
-	
-	//printf("%i\n",num_blocks);
-	//Initialize file system with all zeroes
-	fs = openDisk(filename,nBytes);
-	if(fs == NBYTES_ERR){
-		printf("Invalid Filesystem System Size, must be divisible by 256\n");
-		return -1; //unable to open and configure file
-	} else if(fs == ERR_ACCESS_FILE){
-		printf("Unable to access file %s\n", filename);
-		return -1;
-	} else if(fs == ERR_RESIZE){
-		printf("Unable to truncate to filesystem length\n");
-		return -1;
+int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
+	if (!containsFD(head, FD)) {
+		return EFD;
 	}
 
-	for(i=0;i<num_blocks;i++){
-		if(i<3){
-			init_block = init_blocks(i+1);
-			if(i == 0){
-				init_block.buffer[4] = num_blocks - 2;
-			}
-		} else{
-			init_block = init_blocks(i+1);
-		}
-		if(writeBlock(fs,i,&init_block) == -1){
-			printf("Disk Write Error\n");
-			return -1;
-		}
+	if (size <= 0) {
+		return ESIZE;
 	}
-	closeDisk(fs);
-	return 0;
 
 }
