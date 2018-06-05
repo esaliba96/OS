@@ -162,19 +162,19 @@ int locateFile(char *name){
 	superblock root;
 	inodeblock searcher;
 
-	err = readBlock(diskNo,0,&root);
+	err = readBlock(diskNO,0,&root);
 	if(err == -1){
 		return EREAD;
 	}
 
 	blockNO = root.root_inode;
-	err = readBlock(diskNo,block_no,&searcher);
+	err = readBlock(diskNO, block_no, &searcher);
 	while(searcher.next_inode != 0x00){
 		if(strcmp(name,searcher.filename) == 0){
 			return block_no;
 		}
 		blockNO = searcher.next_inode;
-		err = readBlock(diskNo, block_no, &searcher);
+		err = readBlock(diskNO, block_no, &searcher);
 	}
 	return EFILENOTFOUND;
 }
@@ -200,6 +200,7 @@ int main(){
 	}
 
 	printf("contains %d\n", containsFD(head, 34));
+	tfs_writeFile(1, "hello", 5);
 	return 0;
 }
 
@@ -219,4 +220,13 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 		return ESIZE;
 	}
 
+	superblock b;
+
+	if (readBlock(diskNO, SUPERBLOCKADDR, &b) == -1) {
+		return EREAD;
+	}
+
+	printf("%d\n", b->free_block_count);
+
+	return 0;
 }

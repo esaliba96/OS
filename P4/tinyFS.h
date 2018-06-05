@@ -24,6 +24,7 @@
 #define ROOTINODEADDR 1
 #define EREAD -5
 #define EFILENOTFOUND -6
+#define EREAD
 
 int diskNO; 
 typedef int fileDescriptor;
@@ -77,5 +78,9 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size);
 int tfs_deleteFile(fileDescriptor FD);
 int tfs_readByte(fileDescriptor FD, char *buffer);
 int tfs_seek(fileDescriptor FD, int offset);
+fdNode* create(int data, fdNode* next, uint8_t blockNbr);
+fdNode* add(fdNode* head, int data, uint8_t blockNbr);
+int removeNode(fdNode* head, int data);
+int containsFD(fdNode* head, int fd);
 
 #endif
