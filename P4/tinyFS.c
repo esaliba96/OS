@@ -155,3 +155,88 @@ int main(){
 	}
 	return 0;
 }
+
+int tfs_mkfs(char *filename, int nBytes){
+	// uint8_t init= 0x0;
+	// int fs;
+	// int i;
+	// int check;
+	// int num_blocks = nBytes/BLOCKSIZE;
+	// block init_block;
+	// block block_list[num_blocks];
+
+	
+	// //printf("%i\n",num_blocks);
+	// //Initialize file system with all zeroes
+	// fs = openDisk(filename,nBytes);
+	// if(fs == NBYTES_ERR){
+	// 	printf("Invalid Filesystem System Size, must be divisible by 256\n");
+	// 	return -1; //unable to open and configure file
+	// } else if(fs == ERR_ACCESS_FILE){
+	// 	printf("Unable to access file %s\n", filename);
+	// 	return -1;
+	// } else if(fs == ERR_RESIZE){
+	// 	printf("Unable to truncate to filesystem length\n");
+	// 	return -1;
+	// }
+
+	// for(i=0;i<num_blocks;i++){
+	// 	if(i<3){
+	// 		init_block = init_blocks(i+1);
+	// 		if(i == 0){
+	// 			init_block.buffer[4] = num_blocks - 2;
+	// 		}
+	// 	} else{
+	// 		init_block = init_blocks(i+1);
+	// 	}
+	// 	if(writeBlock(fs,i,&init_block) == -1){
+	// 		printf("Disk Write Error\n");
+	// 		return -1;
+	// 	}
+	// }
+	// closeDisk(fs);
+	// return 0;
+}
+
+int tfs_mkfs(char *filename, int nBytes){
+	uint8_t init= 0x0;
+	int fs;
+	int i;
+	int check;
+	int num_blocks = nBytes/BLOCKSIZE;
+	block init_block;
+	block block_list[num_blocks];
+
+	
+	//printf("%i\n",num_blocks);
+	//Initialize file system with all zeroes
+	fs = openDisk(filename,nBytes);
+	if(fs == NBYTES_ERR){
+		printf("Invalid Filesystem System Size, must be divisible by 256\n");
+		return -1; //unable to open and configure file
+	} else if(fs == ERR_ACCESS_FILE){
+		printf("Unable to access file %s\n", filename);
+		return -1;
+	} else if(fs == ERR_RESIZE){
+		printf("Unable to truncate to filesystem length\n");
+		return -1;
+	}
+
+	for(i=0;i<num_blocks;i++){
+		if(i<3){
+			init_block = init_blocks(i+1);
+			if(i == 0){
+				init_block.buffer[4] = num_blocks - 2;
+			}
+		} else{
+			init_block = init_blocks(i+1);
+		}
+		if(writeBlock(fs,i,&init_block) == -1){
+			printf("Disk Write Error\n");
+			return -1;
+		}
+	}
+	closeDisk(fs);
+	return 0;
+
+}
