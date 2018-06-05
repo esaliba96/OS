@@ -98,6 +98,6 @@ fdNode* add(fdNode* head, int data, uint8_t blockNbr);
 int removeNode(fdNode* head, int data);
 int containsFD(fdNode* head, int fd);
 int getBlockNbr(fdNode* head, int fd);
-int getFreeBlocks(int nbr, int index_free);
+int getFreeBlocks(int nbr, int index_free, int);
 
 #endif

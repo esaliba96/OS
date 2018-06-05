@@ -303,21 +303,21 @@ int main(){
 	printf("%i\n",tfs_mount("temp"));
 	//printf("%i\n",tfo_unmount());
 
-	head = add(head, 1, 7);
-	head = add(head, 2, 8);
-	head = add(head, 3, 4);
-	head = add(head, 4, 42);
-	head = add(head, 5, 42);
-	head = add(head, 6, 32);
+	// head = add(head, 1, 7);
+	// head = add(head, 2, 8);
+	// head = add(head, 3, 4);
+	// head = add(head, 4, 42);
+	// head = add(head, 5, 42);
+	// head = add(head, 6, 32);
 
-	tfs_openFile("fucker");
+	fs = tfs_openFile("fucker");
 	
 	// while (head) {
 	// 	printf("%d\n", head->blockNbr);
 	// 	head = head->next;
 	// }
 
-	tfs_writeFile(1, "hello", 955);
+	tfs_writeFile(fs, "hello", 955);
 
 	return 0;
 }
@@ -347,6 +347,7 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 	superblock* s = (superblock*)(b.buffer);
 	int free_blocks = s->free_block_count;
 	int block_nbr = getBlockNbr(head, FD);
+	printf("block nbr %d\n", block_nbr);
 	int free = s->free_block_pointer;
 	printf("block %d\n", free);
 
@@ -355,6 +356,13 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 	} 
 
 	inodeblock* inode = (inodeblock*)(b.buffer);
+	inode->file_pointer = free;
+	printf("inode %d\n", inode->file_pointer);
+
+	if (writeBlock(diskNO, block_nbr, &inode) == 1) {
+		printf("error writing in tfs_writeFile\n");
+		return EWRITE;
+	}
 
 	int freeMem = inode->file_size % BLOCKSIZE + free_blocks * BLOCKSIZE;
 
@@ -370,18 +378,19 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 		blocksNeeded = size/BLOCKSIZE;
 	}
 
-	getFreeBlocks(blocksNeeded, free);
+	getFreeBlocks(blocksNeeded, free, free_blocks);
 
 	printf("inode %d\n", inode->file_size);
 
 	return SUCCESS;
 }
 
-int getFreeBlocks(int nbr, int index_free) {
+int getFreeBlocks(int nbr, int index_free, int free_blocks) {
 	int i = 0;
 	block b;
 	freeblock* free;
 	fileblock file;
+	superblock root;
 
 	for (; i < nbr; i++) {
 		if (readBlock(diskNO, index_free, &b) == -1) {
@@ -396,5 +405,20 @@ int getFreeBlocks(int nbr, int index_free) {
 		}
 
 		index_free =  free->next_block;
+		free_blocks--;
 	}
+
+	if(readBlock(diskNO, SUPERBLOCKADDR, &root) == EREAD){ // read superblock
+		printf("error reading in getFreeBlocks\n");
+		return EINVALID;
+	}
+
+	root.free_block_count = free_blocks;
+
+	if (writeBlock(diskNO, SUPERBLOCKADDR, &root) == 1) {
+		printf("error writing in getFreeBlocks\n");
+		return EWRITE;
+	}
+
+	printf("free blocks %d\n", free_blocks);
 }
