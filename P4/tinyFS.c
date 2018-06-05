@@ -147,6 +147,38 @@ block init_blocks(int type){
 	return to_return;
 }
 
+
+int tfs_openFile(char *name){
+	static int file_descriptor_bucket;
+	int block_no;
+	if((block_no = locateFile(name))==EFILENOTFOUND){
+
+	}
+}
+
+int locateFile(char *name){
+	int err;
+	uint8_t block_no;
+	superblock root;
+	inodeblock searcher;
+
+	err = readBlock(diskNo,0,&root);
+	if(err == -1){
+		return EREAD;
+	}
+
+	blockNO = root.root_inode;
+	err = readBlock(diskNo,block_no,&searcher);
+	while(searcher.next_inode != 0x00){
+		if(strcmp(name,searcher.filename) == 0){
+			return block_no;
+		}
+		blockNO = searcher.next_inode;
+		err = readBlock(diskNo, block_no, &searcher);
+	}
+	return EFILENOTFOUND;
+}
+
 int main(){
 	int fs;
 	tfs_mkfs("temp",10240);

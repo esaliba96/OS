@@ -22,6 +22,8 @@
 #define ESIZE -4
 #define SUPERBLOCKADDR 0
 #define ROOTINODEADDR 1
+#define EREAD -5
+#define EFILENOTFOUND -6
 
 int diskNO; 
 typedef int fileDescriptor;
@@ -41,7 +43,7 @@ typedef struct inodeblock{
 	uint8_t blocktype;
 	uint8_t magic_number;
 	uint8_t next_inode;
-	uint64_t filename;
+	char filename [8];
 	uint32_t file_size;
 	uint8_t file_pointer;
 	uint8_t buffer[BLOCKSIZE-17];
