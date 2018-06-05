@@ -26,7 +26,8 @@
 #define EFILENOTFOUND -6
 #define EREAD
 
-int diskNO; 
+int diskNO;
+
 typedef int fileDescriptor;
 
 typedef struct block{
@@ -77,6 +78,9 @@ int tfs_closeFile(fileDescriptor FD);
 int tfs_writeFile(fileDescriptor FD, char *buffer, int size);
 int tfs_deleteFile(fileDescriptor FD);
 int tfs_readByte(fileDescriptor FD, char *buffer);
+int locateFile(char *name);
+uint8_t newFile(char *name);
+uint8_t locateLastInode();
 int tfs_seek(fileDescriptor FD, int offset);
 fdNode* create(int data, fdNode* next, uint8_t blockNbr);
 fdNode* add(fdNode* head, int data, uint8_t blockNbr);

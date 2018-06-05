@@ -150,10 +150,33 @@ block init_blocks(int type){
 
 int tfs_openFile(char *name){
 	static int file_descriptor_bucket;
-	int block_no;
-	if((block_no = locateFile(name))==EFILENOTFOUND){
+	inodeblock new_inode;
 
+	int block_no;
+	if((block_no = locateFile(name))!=EFILENOTFOUND){
+		head = add(head,file_descriptor_bucket,block_no);
+		return file_descriptor_bucket++;
+	} 
+
+}
+
+uint8_t newFile(char *name){
+
+}
+
+uint8_t locateLastInode(){
+	err = readBlock(diskNO, SUPERBLOCKADDR, &root);
+	if(err == -1){
+		return EREAD;
 	}
+
+	block_no = root.root_inode;
+	err = readBlock(diskNO, block_no, &searcher);
+	while(searcher.next_inode != 0x00){
+		block_no = searcher.next_inode;
+		err = readBlock(diskNO, block_no, &searcher);
+	}
+	return block_no;
 }
 
 int locateFile(char *name){
@@ -162,18 +185,19 @@ int locateFile(char *name){
 	superblock root;
 	inodeblock searcher;
 
-	err = readBlock(diskNO,0,&root);
+	err = readBlock(diskNO, SUPERBLOCKADDR, &root); 
 	if(err == -1){
 		return EREAD;
 	}
 
-	blockNO = root.root_inode;
+	block_no = root.root_inode;
 	err = readBlock(diskNO, block_no, &searcher);
+
 	while(searcher.next_inode != 0x00){
 		if(strcmp(name,searcher.filename) == 0){
 			return block_no;
 		}
-		blockNO = searcher.next_inode;
+		block_no = searcher.next_inode;
 		err = readBlock(diskNO, block_no, &searcher);
 	}
 	return EFILENOTFOUND;
