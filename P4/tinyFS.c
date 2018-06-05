@@ -44,13 +44,23 @@ int removeNode(fdNode* head, int data) {
 
 int containsFD(fdNode* head, int fd) {
 	while(head != NULL) {
-//		printf("%d\n", head->data);;
 		if (head->data == fd) {
 			return 1;
 		} 
 		head = head->next;
 	}
 	return 0;
+}
+
+int getBlockNbr(fdNode* head, int fd) {
+	while (head != NULL) {
+		if (head->data == fd) {
+			return head->blockNbr;
+		}
+		head = head->next;
+	}
+
+	return -1;
 }
 
 int tfs_mkfs(char *filename, int nBytes){
@@ -160,24 +170,24 @@ int tfs_openFile(char *name){
 
 }
 
-uint8_t newFile(char *name){
+// uint8_t newFile(char *name){
 
-}
+// }
 
-uint8_t locateLastInode(){
-	err = readBlock(diskNO, SUPERBLOCKADDR, &root);
-	if(err == -1){
-		return EREAD;
-	}
+// uint8_t locateLastInode(){
+// 	err = readBlock(diskNO, SUPERBLOCKADDR, &root);
+// 	if(err == -1){
+// 		return EREAD;
+// 	}
 
-	block_no = root.root_inode;
-	err = readBlock(diskNO, block_no, &searcher);
-	while(searcher.next_inode != 0x00){
-		block_no = searcher.next_inode;
-		err = readBlock(diskNO, block_no, &searcher);
-	}
-	return block_no;
-}
+// 	block_no = root.root_inode;
+// 	err = readBlock(diskNO, block_no, &searcher);
+// 	while(searcher.next_inode != 0x00){
+// 		block_no = searcher.next_inode;
+// 		err = readBlock(diskNO, block_no, &searcher);
+// 	}
+// 	return block_no;
+// }
 
 int locateFile(char *name){
 	int err;
@@ -206,10 +216,8 @@ int locateFile(char *name){
 int main(){
 	int fs;
 	tfs_mkfs("temp",10240);
-	//printf("%i\n",tfs_mount("temp"));
+	printf("%i\n",tfs_mount("temp"));
 	//printf("%i\n",tfo_unmount());
-
-	
 
 	head = add(head, 1, 7);
 	head = add(head, 2, 8);
@@ -218,13 +226,13 @@ int main(){
 	head = add(head, 5, 42);
 	head = add(head, 6, 32);
 	
-	while (head) {
-		printf("%d\n", head->blockNbr);
-		head = head->next;
-	}
+	// while (head) {
+	// 	printf("%d\n", head->blockNbr);
+	// 	head = head->next;
+	// }
 
-	printf("contains %d\n", containsFD(head, 34));
-	tfs_writeFile(1, "hello", 5);
+	tfs_writeFile(1, "hello", 955);
+
 	return 0;
 }
 
@@ -244,13 +252,56 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 		return ESIZE;
 	}
 
-	superblock b;
+	block b;
 
 	if (readBlock(diskNO, SUPERBLOCKADDR, &b) == -1) {
 		return EREAD;
 	}
 
-	printf("%d\n", b->free_block_count);
+	superblock* s = (superblock*)(b.buffer);
+	int free_blocks = s->free_block_count;
+	int block_nbr = getBlockNbr(head, FD);
+	printf("block %d\n", s->free_block_pointer);
 
-	return 0;
+	if (readBlock(diskNO, block_nbr, &b) == -1) {
+		return EREAD;
+	} 
+
+	inodeblock* inode = (inodeblock*)(b.buffer);
+
+	int freeMem = inode->file_size % BLOCKSIZE + free_blocks * BLOCKSIZE;
+
+	if (size > freeMem) {
+		return EOUTOFMEM;
+	}
+
+	int blocksNeeded;
+
+	if (size % BLOCKSIZE != 0) {
+		blocksNeeded = size/BLOCKSIZE + 1; 
+	} else {
+		blocksNeeded = size/BLOCKSIZE;
+	}
+
+	getFreeBlocks(blocksNeeded, s->free_block_pointer);
+
+	printf("inode %d\n", inode->file_size);
+
+	return SUCCESS;
+}
+
+int getFreeBlocks(int nbr, uint8_t index_free) {
+	int i = 0;
+	block b;
+	freeblock* free;
+
+	for (; i < nbr; i++) {
+		printf("here %d\n", index_free);
+		if (readBlock(diskNO, index_free, &b) == -1) {
+			return EREAD;
+		}
+		free = (freeblock*) (b.buffer);
+		printf("enxt %d\n", free->next_block);
+		index_free =  free->next_block;
+	}
 }

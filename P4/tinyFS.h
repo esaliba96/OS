@@ -94,5 +94,7 @@ fdNode* create(int data, fdNode* next, uint8_t blockNbr);
 fdNode* add(fdNode* head, int data, uint8_t blockNbr);
 int removeNode(fdNode* head, int data);
 int containsFD(fdNode* head, int fd);
+int getBlockNbr(fdNode* head, int fd);
+int getFreeBlocks(int nbr, uint8_t index_free);
 
 #endif
