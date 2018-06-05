@@ -88,13 +88,14 @@ int tfs_mkfs(char *filename, int nBytes){
 	}
 
 	for(i=0;i<num_blocks;i++){
-		if(i<3){
+		if(i<2){
 			init_block = init_blocks(i+1);
 			if(i == 0){
 				init_block.buffer[4] = num_blocks - 2;
 			}
 		} else{
 			init_block = init_blocks(i+1);
+			init_block.buffer[2] = i+1;
 		}
 		if(writeBlock(fs,i,&init_block) == -1){
 			printf("Disk Write Error\n");
@@ -142,8 +143,8 @@ block init_blocks(int type){
 
 	if(type == 1){ // super block
 		to_return.buffer[0] = 0x01;
-		to_return.buffer[2] = 0x02;
-		to_return.buffer[3] = 0x03;
+		to_return.buffer[2] = 0x01;
+		to_return.buffer[3] = 0x02;
 	} else if(type == 2){ // inode block
 		to_return.buffer[0] = 0x02;
 		to_return.buffer[2] = 0x00;
@@ -170,24 +171,85 @@ int tfs_openFile(char *name){
 
 }
 
-// uint8_t newFile(char *name){
+int newFile(char *name){
+	int err;
+	superblock root;
+	freeblock for_inode;
+	freeblock for_file;
+	inodeblock new_block;
+	inodeblock last_block;
+	fileblock new_file_block;
 
-// }
+	uint8_t inode_block_no;
+	uint8_t file_block_no;
+	uint8_t current_last_inode = locateLastInode();
 
-// uint8_t locateLastInode(){
-// 	err = readBlock(diskNO, SUPERBLOCKADDR, &root);
-// 	if(err == -1){
-// 		return EREAD;
-// 	}
+	if(readBlock(diskNO, SUPERBLOCKADDR, &root) == EREAD){ // read superblock
+		return EINVALID;
+	}
+	if(readBlock(diskNO, current_last_inode, &last_block) == EREAD){ // read superblock
+		return EINVALID;
+	}
+	if(root.free_block_count < 2){ // check available mem
+		return EOUTOFMEM;
+	}
+	if(readBlock(diskNO, root.free_block_pointer, &for_inode) == EREAD){ // readblock for inoide
+		return EINVALID;
+	}
+	inode_block_no = root.free_block_pointer; // grab inode block number
+	root.free_block_pointer = for_inode.next_block; // update freeblockpointer
+	
+	if(readBlock(diskNO, root.free_block_pointer, &for_file) == EREAD){ //readblock for file
+		return EINVALID;
+	}
+	file_block_no = root.free_block_pointer; //grab file block number
+	root.free_block_pointer = for_file.next_block; //update freeblock pointer
 
-// 	block_no = root.root_inode;
-// 	err = readBlock(diskNO, block_no, &searcher);
-// 	while(searcher.next_inode != 0x00){
-// 		block_no = searcher.next_inode;
-// 		err = readBlock(diskNO, block_no, &searcher);
-// 	}
-// 	return block_no;
-// }
+	last_block.next_inode = inode_block_no; // update the current last inode for write
+	new_block = newInode(name,file_block_no); ///build new inode for write
+	new_file_block = newFileBlock(); // build new file for write
+
+	//need to write root, new last inode, new block and new file block
+
+
+	//new_block = (inodeblock) init_blocks(2);
+}
+
+inodeblock newInode(char *name, uint8_t fp){
+	inodeblock to_return;
+	memset(&to_return,0,BLOCKSIZE);
+	to_return.blocktype = 0x02;
+	to_return.magic_number = 0x45;
+	to_return.next_inode = 0x00;
+	strcpy(to_return.filename,name);
+	to_return.file_size = 0;
+	to_return.file_pointer = fp;
+
+ }
+
+fileblock newFileBlock(){
+	fileblock to_return;
+	memset(&to_return,0,BLOCKSIZE);
+	to_return.blocktype = 0x03;
+	to_return.magic_number = 0x45;
+	to_return.next_block = 0x00;
+}
+
+uint8_t locateLastInode(){
+	int err;
+	superblock root;
+	inodeblock searcher;
+	uint8_t block_no;
+
+	err = readBlock(diskNO, SUPERBLOCKADDR, &root);
+	block_no = root.root_inode;
+	err = readBlock(diskNO, block_no, &searcher);
+	while(searcher.next_inode != 0x00){
+		block_no = searcher.next_inode;
+		err = readBlock(diskNO, block_no, &searcher);
+	}
+	return block_no;
+}
 
 int locateFile(char *name){
 	int err;
