@@ -50,6 +50,11 @@ typedef struct superblock{
 	uint8_t buffer[BLOCKSIZE-12];
 }__attribute__((packed)) superblock;
 
+typedef struct fdNode {
+	int data;
+	struct fdNode* next;
+} fdNode;
+
 
 int tfs_mkfs(char *filename, int nBytes);
 block init_blocks(int type);

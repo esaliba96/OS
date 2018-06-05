@@ -1,5 +1,24 @@
 #include "tinyFS.h"
 
+fdNode* create(int data, fdNode* next) {
+    fdNode* new_node = (fdNode*)malloc(sizeof(fdNode));
+    
+    if(new_node == NULL) {
+        printf("Error creating a new node.\n");
+        exit(0);
+    }
+    new_node->data = data;
+    new_node->next = next;
+ 
+    return new_node;
+}
+
+fdNode* add(fdNode* head, int data) {
+ 	fdNode* new_node = create(data,head);
+    head = new_node;
+    
+    return head;
+}
 
 int tfs_mkfs(char *filename, int nBytes){
 	uint8_t init= 0x0;
@@ -98,7 +117,18 @@ block init_blocks(int type){
 int main(){
 	int fs;
 	tfs_mkfs("temp",10240);
-	printf("%i\n",tfs_mount("temp"));
-	printf("%i\n",tfo_unmount());
+	//printf("%i\n",tfs_mount("temp"));
+	//printf("%i\n",tfo_unmount());
+
+	fdNode* head = NULL;
+
+	head = add(head, 1);
+	head = add(head, 2);
+	head = add(head, 3);
+
+	while (head) {
+		printf("%d\n", head->data);
+		head = head->next;
+	}
 	return 0;
 }
