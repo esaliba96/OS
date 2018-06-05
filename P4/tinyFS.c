@@ -325,7 +325,8 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 	superblock* s = (superblock*)(b.buffer);
 	int free_blocks = s->free_block_count;
 	int block_nbr = getBlockNbr(head, FD);
-	printf("block %d\n", s->free_block_pointer);
+	int free = s->free_block_pointer;
+	printf("block %d\n", free);
 
 	if (readBlock(diskNO, block_nbr, &b) == -1) {
 		return EREAD;
@@ -347,25 +348,24 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 		blocksNeeded = size/BLOCKSIZE;
 	}
 
-	getFreeBlocks(blocksNeeded, s->free_block_pointer);
+	getFreeBlocks(blocksNeeded, free);
 
 	printf("inode %d\n", inode->file_size);
 
 	return SUCCESS;
 }
 
-int getFreeBlocks(int nbr, uint8_t index_free) {
+int getFreeBlocks(int nbr, int index_free) {
 	int i = 0;
 	block b;
 	freeblock* free;
 
 	for (; i < nbr; i++) {
-		printf("here %d\n", index_free);
 		if (readBlock(diskNO, index_free, &b) == -1) {
 			return EREAD;
 		}
 		free = (freeblock*) (b.buffer);
-		printf("enxt %d\n", free->next_block);
+		printf("next %d\n", free->next_block);
 		index_free =  free->next_block;
 	}
 }
