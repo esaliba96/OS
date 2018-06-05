@@ -24,6 +24,32 @@ typedef struct block{
 	uint8_t buffer[BLOCKSIZE];
 }__attribute__((packed)) block;
 
+typedef struct fileblock{
+	uint8_t blocktype;
+	uint8_t magic_number;
+	uint8_t next_block;
+	uint8_t buffer[BLOCKSIZE-3];
+}__attribute__((packed)) fileblock;
+
+typedef struct inodeblock{
+	uint8_t blocktype;
+	uint8_t magic_number;
+	uint8_t next_inode;
+	uint64_t filename;
+	uint8_t file_pointer;
+	//creation time
+	//last access
+	uint8_t buffer[BLOCKSIZE-12];
+}__attribute__((packed)) inodeblock;
+
+typedef struct superblock{
+	uint8_t blocktype;
+	uint8_t magic_number;
+	uint8_t free_block_pointer;
+	uint8_t free_block_count;
+	uint8_t buffer[BLOCKSIZE-12];
+}__attribute__((packed)) superblock;
+
 
 int tfs_mkfs(char *filename, int nBytes);
 block init_blocks(int type);
