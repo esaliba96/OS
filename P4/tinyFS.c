@@ -20,6 +20,24 @@ fdNode* add(fdNode* head, int data) {
     return head;
 }
 
+void removeNode(fdNode* head, int data) {
+	fdNode *curr, *prev;
+  	prev = NULL;
+
+  	for (curr = head; curr != NULL; prev = curr, curr = curr->next) {
+
+    if (curr->data == data) {  
+    	if (prev == NULL) {
+        	head = curr->next;
+      	} else {
+        	prev->next = curr->next;
+      	}
+		free(curr);
+     	return;
+    }
+  }
+}
+
 int tfs_mkfs(char *filename, int nBytes){
 	uint8_t init= 0x0;
 	int fs;
@@ -125,6 +143,11 @@ int main(){
 	head = add(head, 1);
 	head = add(head, 2);
 	head = add(head, 3);
+	removeNode(head, 2);
+	head = add(head, 4);
+	head = add(head, 5);
+	head = add(head, 6);
+	removeNode(head, 1);
 
 	while (head) {
 		printf("%d\n", head->data);
