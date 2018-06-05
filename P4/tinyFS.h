@@ -16,6 +16,12 @@
 #define BLOCKSIZE 256
 #define DEFAULT_DISK_SIZE 10240 
 #define DEFAULT_DISK_NAME “tinyFSDisk” 
+#define SUCCESS 1
+#define FAILURE 0
+#define EFD -3
+#define ESIZE -4
+#define SUPERBLOCKADDR 0
+#define ROOTINODEADDR 1
 
 int diskNO; 
 typedef int fileDescriptor;
