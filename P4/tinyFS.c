@@ -359,6 +359,7 @@ int getFreeBlocks(int nbr, int index_free) {
 	int i = 0;
 	block b;
 	freeblock* free;
+	fileblock file;
 
 	for (; i < nbr; i++) {
 		if (readBlock(diskNO, index_free, &b) == -1) {
@@ -366,6 +367,12 @@ int getFreeBlocks(int nbr, int index_free) {
 		}
 		free = (freeblock*) (b.buffer);
 		printf("next %d\n", free->next_block);
+		file = newFileBlock(free->next_block);
+
+		if (writeBlock(diskNO, index_free, &file) == 1) {
+			return EWRITE;
+		}
+
 		index_free =  free->next_block;
 	}
 }

@@ -26,6 +26,7 @@
 #define EFILENOTFOUND -6
 #define EINVALID -7
 #define EOUTOFMEM -8
+#define EWRITE -9
 
 int diskNO;
 
