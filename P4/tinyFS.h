@@ -24,7 +24,6 @@
 #define ROOTINODEADDR 1
 #define EREAD -5
 #define EFILENOTFOUND -6
-#define EREAD
 
 int diskNO;
 
