@@ -36,19 +36,20 @@ typedef struct inodeblock{
 	uint8_t magic_number;
 	uint8_t next_inode;
 	uint64_t filename;
+	uint32_t file_size;
 	uint8_t file_pointer;
-	//creation time
-	//last access
-	uint8_t buffer[BLOCKSIZE-12];
+	uint8_t buffer[BLOCKSIZE-17];
 }__attribute__((packed)) inodeblock;
 
 typedef struct superblock{
 	uint8_t blocktype;
 	uint8_t magic_number;
+	uint8_t root_inode;
 	uint8_t free_block_pointer;
 	uint8_t free_block_count;
-	uint8_t buffer[BLOCKSIZE-12];
+	uint8_t buffer[BLOCKSIZE-6];
 }__attribute__((packed)) superblock;
+
 
 typedef struct fdNode {
 	int data;
