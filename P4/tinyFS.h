@@ -54,7 +54,7 @@ typedef struct inodeblock{
 	uint8_t blocktype;
 	uint8_t magic_number;
 	uint8_t next_inode;
-	char filename [8];
+	char filename [9];
 	uint32_t file_size;
 	uint8_t file_pointer;
 	uint8_t buffer[BLOCKSIZE-17];

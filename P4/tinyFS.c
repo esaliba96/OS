@@ -214,6 +214,7 @@ int newFile(char *name){
 	last_block.next_inode = inode_block_no; // update the current last inode for write
 	new_block = newInode(name,file_block_no); ///build new inode for write
 	new_file_block = newFileBlock(0); // build new file for write
+	root.free_block_count -=2;
 
 	if(writeBlock(diskNO, SUPERBLOCKADDR, &root) == -1){
 			printf("Disk Write Error\n");
@@ -243,7 +244,7 @@ inodeblock newInode(char *name, uint8_t fp){
 	strcpy(to_return.filename,name);
 	to_return.file_size = 0;
 	to_return.file_pointer = fp;
-
+	return to_return;
  }
 
 fileblock newFileBlock(uint8_t next_block_offset){
