@@ -406,6 +406,7 @@ int getFreeBlocks(int nbr, int index_free, int free_blocks) {
 	}
 
 	root.free_block_count = free_blocks;
+	root.free_block_pointer = index_free;
 
 	if (writeBlock(diskNO, SUPERBLOCKADDR, &root) == 1) {
 		printf("error writing in getFreeBlocks\n");
