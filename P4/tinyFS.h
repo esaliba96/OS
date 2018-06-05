@@ -24,6 +24,8 @@
 #define ROOTINODEADDR 1
 #define EREAD -5
 #define EFILENOTFOUND -6
+#define EINVALID -7
+#define EOUTOFMEM -8
 
 int diskNO;
 
@@ -39,6 +41,13 @@ typedef struct fileblock{
 	uint8_t next_block;
 	uint8_t buffer[BLOCKSIZE-3];
 }__attribute__((packed)) fileblock;
+
+typedef struct freeblock{
+	uint8_t blocktype;
+	uint8_t magic_number;
+	uint8_t next_block;
+	uint8_t buffer[BLOCKSIZE-3];
+}__attribute__((packed)) freeblock;
 
 typedef struct inodeblock{
 	uint8_t blocktype;
@@ -78,8 +87,8 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size);
 int tfs_deleteFile(fileDescriptor FD);
 int tfs_readByte(fileDescriptor FD, char *buffer);
 int locateFile(char *name);
-uint8_t newFile(char *name);
-uint8_t locateLastInode();
+int newFile(char *name);
+inodeblock locateLastInode();
 int tfs_seek(fileDescriptor FD, int offset);
 fdNode* create(int data, fdNode* next, uint8_t blockNbr);
 fdNode* add(fdNode* head, int data, uint8_t blockNbr);
