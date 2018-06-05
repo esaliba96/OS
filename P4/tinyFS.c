@@ -168,6 +168,12 @@ int tfs_openFile(char *name){
 		head = add(head,file_descriptor_bucket,block_no);
 		return file_descriptor_bucket++;
 	} 
+	block_no = newFile(name);
+	if(block_no < 0){
+		return block_no;
+	}
+	head = add(head,file_descriptor_bucket,block_no);
+	return file_descriptor_bucket++;
 
 }
 
@@ -209,10 +215,23 @@ int newFile(char *name){
 	new_block = newInode(name,file_block_no); ///build new inode for write
 	new_file_block = newFileBlock(0); // build new file for write
 
-	//need to write root, new last inode, new block and new file block
-
-
-	//new_block = (inodeblock) init_blocks(2);
+	if(writeBlock(diskNO, SUPERBLOCKADDR, &root) == -1){
+			printf("Disk Write Error\n");
+			return EWRITE;
+	}
+	if(writeBlock(diskNO, current_last_inode ,&last_block) == -1){
+			printf("Disk Write Error\n");
+			return EWRITE;
+	}
+	if(writeBlock(diskNO, inode_block_no, &new_block) == -1){
+			printf("Disk Write Error\n");
+			return EWRITE;
+	}
+	if(writeBlock(diskNO, file_block_no, &new_file_block) == -1){
+			printf("Disk Write Error\n");
+			return EWRITE;
+	}
+	return inode_block_no;
 }
 
 inodeblock newInode(char *name, uint8_t fp){
@@ -289,6 +308,8 @@ int main(){
 	head = add(head, 4, 42);
 	head = add(head, 5, 42);
 	head = add(head, 6, 32);
+
+	tfs_openFile("fucker");
 	
 	// while (head) {
 	// 	printf("%d\n", head->blockNbr);
