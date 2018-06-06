@@ -358,21 +358,17 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 		return EWRITE;
 	}
 
-	int freeMem = inode.file_size % BLOCKSIZE + free_blocks * BLOCKSIZE;
+	int freeMem = inode.file_size % DATABLOCKSIZE + free_blocks * DATABLOCKSIZE;
 
 	if (size > freeMem) {
 		return EOUTOFMEM;
 	}
 
-	int blocksNeeded;
+	int blocksNeeded = blocksNeeded(size); 
+	
+	int head = getFreeBlocks(blocksNeeded, free, free_blocks);
 
-	if (size % BLOCKSIZE != 0) {
-		blocksNeeded = size/BLOCKSIZE + 1; 
-	} else {
-		blocksNeeded = size/BLOCKSIZE;
-	}
-
-	getFreeBlocks(blocksNeeded, free, free_blocks);
+	writeDataToFiles(blocksNeeded, head, size, buffer);
 
 	printf("inode %d\n", inode.file_size);
 
@@ -385,6 +381,7 @@ int getFreeBlocks(int nbr, int index_free, int free_blocks) {
 	freeblock* free;
 	fileblock file;
 	superblock root;
+	int headFreeBlock = index_free;
 
 	for (; i < nbr; i++) {
 		if (readBlock(diskNO, index_free, &b) == -1) {
@@ -398,7 +395,7 @@ int getFreeBlocks(int nbr, int index_free, int free_blocks) {
 			return EWRITE;
 		}
 
-		index_free =  free->next_block;
+		index_free = free->next_block;
 		free_blocks--;
 	}
 
@@ -416,4 +413,50 @@ int getFreeBlocks(int nbr, int index_free, int free_blocks) {
 	}
 
 	printf("free blocks %d\n", free_blocks);
+
+	return headFreeBlock;
+}
+
+int blocksNeeded(int size) {
+	int blocksNeeded;
+
+	if (size % DATABLOCKSIZE != 0) {
+		blocksNeeded = size/DATABLOCKSIZE + 1; 
+	} else {
+		blocksNeeded = size/DATABLOCKSIZE;
+	}
+
+	return blocksNeeded;
+}
+
+int writeDataToFiles(int blockNbr, int head, int size, uint8_t* buffer) {
+	int i = 0;
+	fileblock file;
+	
+	for (; i < blockNbr - 1; i++) {
+		if (readBlock(diskNO, head, &file) == -1) {
+			return EREAD;
+		}
+		memcpy(file.data, buffer + (i * BLOCKSIZE), DATABLOCKSIZE);
+
+		if (writeBlock(diskNO, head, file) == 1) {
+			printf("error writing in getFreeBlocks\n");
+			return EWRITE;
+		}
+		head = file.next_block;
+	}
+
+	int remaining = size % DATABLOCKSIZE;
+
+	if (readBlock(diskNO, head, &file) == -1) {
+		return EREAD;
+	}
+	memcpy(file.data, buffer + (i * DATABLOCKSIZE), remaining);
+
+	if (writeBlock(diskNO, head, file) == 1) {
+		printf("error writing in getFreeBlocks\n");
+		return EWRITE;
+	}
+
+	return SUCCESS;
 }

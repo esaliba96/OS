@@ -27,6 +27,7 @@
 #define EINVALID -7
 #define EOUTOFMEM -8
 #define EWRITE -9
+#define DATABLOCKSIZE 253
 
 int diskNO;
 
@@ -47,7 +48,7 @@ typedef struct freeblock{
 	uint8_t blocktype;
 	uint8_t magic_number;
 	uint8_t next_block;
-	uint8_t buffer[BLOCKSIZE-3];
+	uint8_t buffer[DATABLOCKSIZE];
 }__attribute__((packed)) freeblock;
 
 typedef struct inodeblock{
@@ -100,5 +101,6 @@ int removeNode(fdNode* head, int data);
 int containsFD(fdNode* head, int fd);
 int getBlockNbr(fdNode* head, int fd);
 int getFreeBlocks(int nbr, int index_free, int);
+int writeDataToFiles(int blockNbr, int head, int size, uint8_t* buffer);
 
 #endif
