@@ -104,5 +104,6 @@ int setOffset(int fd, uint64_t offset);
 int getBlockNbr(fdNode* head, int fd);
 int getFreeBlocks(int nbr, int index_free, int);
 int writeDataToFiles(int blockNbr, int head, int size, uint8_t* buffer);
+int blocksNeeded(int size);
 
 #endif

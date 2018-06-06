@@ -327,7 +327,7 @@ int main(){
 	// 	head = head->next;
 	// }
 
-	tfs_writeFile(fs, "hello", 955);
+	tfs_writeFile(fs, "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll", 639);
 
 	return 0;
 }
@@ -386,12 +386,13 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 		return EOUTOFMEM;
 	}
 
-	int blocksNeeded = blocksNeeded(size); 
+	int blocks = blocksNeeded(size); 
 	
-	int head = getFreeBlocks(blocksNeeded, free, free_blocks);
+	int head = getFreeBlocks(blocks, free, free_blocks);
 
-	writeDataToFiles(blocksNeeded, head, size, buffer);
+	writeDataToFiles(blocks, head, size, buffer);
 
+	resetOffset(FD);
 	printf("inode %d\n", inode.file_size);
 
 	return SUCCESS;
@@ -459,9 +460,9 @@ int writeDataToFiles(int blockNbr, int head, int size, uint8_t* buffer) {
 		if (readBlock(diskNO, head, &file) == -1) {
 			return EREAD;
 		}
-		memcpy(file.data, buffer + (i * BLOCKSIZE), DATABLOCKSIZE);
+		memcpy(file.buffer, buffer + (i * BLOCKSIZE), DATABLOCKSIZE);
 
-		if (writeBlock(diskNO, head, file) == 1) {
+		if (writeBlock(diskNO, head, &file) == 1) {
 			printf("error writing in getFreeBlocks\n");
 			return EWRITE;
 		}
@@ -473,9 +474,9 @@ int writeDataToFiles(int blockNbr, int head, int size, uint8_t* buffer) {
 	if (readBlock(diskNO, head, &file) == -1) {
 		return EREAD;
 	}
-	memcpy(file.data, buffer + (i * DATABLOCKSIZE), remaining);
+	memcpy(file.buffer, buffer + (i * DATABLOCKSIZE), remaining);
 
-	if (writeBlock(diskNO, head, file) == 1) {
+	if (writeBlock(diskNO, head, &file) == 1) {
 		printf("error writing in getFreeBlocks\n");
 		return EWRITE;
 	}
