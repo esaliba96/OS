@@ -233,12 +233,20 @@ inodeblock newInode(char *name, uint8_t fp){
 	return to_return;
  }
 
-fileblock newFileBlock(uint8_t next_block_offset){
+fileblock newFileBlock(uint8_t next_block_offset, int size, byte* data){
 	fileblock to_return;
+	int def = 253;
 	memset(&to_return,0,BLOCKSIZE);
+
 	to_return.blocktype = 0x03;
 	to_return.magic_number = 0x45;
 	to_return.next_block = next_block_offset;
+	if(size>253){
+		memcpy(&to_return, data, def);
+	} else {
+		memcpy(&to_return, data, size);
+	}
+
 	return to_return;
 }
 
