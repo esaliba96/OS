@@ -53,6 +53,28 @@ int containsFD(fdNode* head, int fd) {
 	return 0;
 }
 
+int resetOffset(int fd){
+	while(head != NULL) {
+		if (head->data == fd) {
+			head->offset = 0;
+			return 1;
+		} 
+		head = head->next;
+	}
+	return 0;
+}
+
+int setOffset(int fd, uint64_t offset){
+	while(head != NULL) {
+		if (head->data == fd) {
+			head->offset = offset;
+			return 1;
+		} 
+		head = head->next;
+	}
+	return 0;
+}
+
 int getBlockNbr(fdNode* head, int fd) {
 	while (head != NULL) {
 		if (head->data == fd) {
