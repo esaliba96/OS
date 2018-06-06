@@ -73,6 +73,7 @@ typedef struct superblock{
 typedef struct fdNode {
 	int data;
 	uint8_t blockNbr;
+	uint64_t offset;
 	struct fdNode* next;
 } fdNode;
 

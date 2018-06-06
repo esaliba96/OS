@@ -2,7 +2,7 @@
 
 fdNode* head = NULL;
 
-fdNode* create(int data, fdNode* next, uint8_t blockNbr) {
+fdNode* create(int data, fdNode* next, uint8_t blockNbr, uint64_t offset) {
     fdNode* new_node = (fdNode*)malloc(sizeof(fdNode));
     
     if(new_node == NULL) {
@@ -12,12 +12,13 @@ fdNode* create(int data, fdNode* next, uint8_t blockNbr) {
     new_node->data = data;
     new_node->next = next;
     new_node->blockNbr = blockNbr;
+    new_node->offset = offset;
  
     return new_node;
 }
 
-fdNode* add(fdNode* head, int data, uint8_t blockNbr) {
- 	fdNode* new_node = create(data, head, blockNbr);
+fdNode* add(fdNode* head, int data, uint8_t blockNbr, uint64_t offset) {
+ 	fdNode* new_node = create(data, head, blockNbr, offset);
     head = new_node;
     
     return head;
@@ -165,14 +166,14 @@ int tfs_openFile(char *name){
 
 	int block_no;
 	if((block_no = locateFile(name))!=EFILENOTFOUND){
-		head = add(head,file_descriptor_bucket,block_no);
+		head = add(head,file_descriptor_bucket,block_no,0);
 		return file_descriptor_bucket++;
 	} 
 	block_no = newFile(name);
 	if(block_no < 0){
 		return block_no;
 	}
-	head = add(head,file_descriptor_bucket,block_no);
+	head = add(head,file_descriptor_bucket,block_no,0);
 	return file_descriptor_bucket++;
 
 }
