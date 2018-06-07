@@ -12,6 +12,7 @@
 #include <string.h>
 #include <strings.h>
 #include "libDisk.h"
+#include <time.h>
 
 #define BLOCKSIZE 256
 #define DEFAULT_DISK_SIZE 10240 
@@ -58,7 +59,10 @@ typedef struct inodeblock{
 	char filename [9];
 	uint32_t file_size;
 	uint8_t file_pointer;
-	uint8_t buffer[BLOCKSIZE-17];
+	uint64_t cTime;
+	uint64_t aTime;
+	uint64_t mTime;
+	uint8_t buffer[BLOCKSIZE-35];
 }__attribute__((packed)) inodeblock;
 
 typedef struct superblock{
@@ -112,5 +116,6 @@ int getLastFreeBlock();
 int countBlocks(int inode_addr);
 int tfs_rename(int FD, char* new_name);
 int tfr_readdir();
+int tfs_readFileInfo(fileDescriptor FD);
 
 #endif
