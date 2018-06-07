@@ -392,6 +392,7 @@ int getLastFreeBlock(){
 		}
 		counter--;
 	}
+	printf("next_block %d\n",current.next_block);
 	return current.next_block;
 }
 
@@ -461,8 +462,7 @@ int locateFile(char *name){
 int main(){
 	int fs;
 	tfs_mkfs("temp",10240);
-	printf("%i\n",tfs_mount("temp"));
-	//printf("%i\n",tfo_unmount());
+	testSuite1("temp");
 
 	// head = add(1, 7,0);
 	// head = add(2, 8,0);
@@ -471,10 +471,10 @@ int main(){
 	// head = add(5, 42,0);
 	// head = add(6, 32,0);
 
-	 fs = tfs_openFile("fucker");
-	 tfs_openFile("tits");
-	 tfs_openFile("asss");
-	 tfs_openFile("niggas");
+	 // fs = tfs_openFile("fucker");
+	 // tfs_openFile("tits");
+	 // tfs_openFile("asss");
+	 // tfs_openFile("niggas");
 	
 	// while (head) {
 	// 	printf("%d\n", head->blockNbr);
@@ -486,18 +486,49 @@ int main(){
 	//tfs_writeFile(fs, "hello", 955);
 	//tfs_deleteFile(fs);
 	//tfs_rename(fs, "hello");
-	tfr_readdir();
-	//printf("address of last block %d\n", getLastFreeBlock());
-	while(head != NULL) {
-		printf("id: %d\n", head->data);
-		head =head->next;
-	}
+	// tfr_readdir();
+	// //printf("address of last block %d\n", getLastFreeBlock());
+	// while(head != NULL) {
+	// 	printf("id: %d\n", head->data);
+	// 	head =head->next;
+	// }
+	// printf("%i\n",tfs_mount("temp"));
+
+	// fs = tfs_openFile("fucker");
+
+	// tfs_writeFile(fs, "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll", 639);
+
+	// tfs_deleteFile(fs);
 	return 0;
 }
 
+int testSuite1(char * fs_name){
+	int i;
+	int fd;
+	int fd2;
+	int fd3;
+	char first_string[983];
+	char second_string[583];
+	for(i = 0; i < 983; i++){
+		first_string[i] = 'e';
+	}
+	for(i = 0; i < 583; i++){
+		second_string[i] = 'b';
+	}
+	
+	tfs_mount(fs_name);
+	fd = tfs_openFile("file1");
+	fd2 = tfs_openFile("file2");
+	tfs_writeFile(fd, first_string, strlen(first_string));
+	tfs_writeFile(fd2, second_string, strlen(second_string));
+	fd3 = tfs_openFile("file3");
+	return 0;
+}
+
+
 int tfs_closeFile(fileDescriptor FD){
 	if (removeNode(FD)) {
-		return SUCCESS;
+		return SUCCESS;	
 	}
 	return EFD;
 }
@@ -526,10 +557,8 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 	free_blocks = root.free_block_count;
 	block_nbr = getBlockNbr(FD);
 	
-	printf("block nbr %d\n", block_nbr);
 	
 	free = root.free_block_pointer;
-	printf("block %d\n", free)	;
 
 	if (readBlock(diskNO, block_nbr, &inode) == -1) {
 		return EREAD;
@@ -537,10 +566,9 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 
 	inode.file_pointer = free;
 	int freeMem = inode.file_size % DATABLOCKSIZE + free_blocks * DATABLOCKSIZE;
-	printf("inode %d\n", inode.file_pointer);
 	inode.file_size += (uint32_t)size;
-	//inode.file_size = (uint32_t)inode.file_size;
 	printf("file size %d\n", inode.file_size);
+
 	if (writeBlock(diskNO, block_nbr, &inode) == 1) {
 		printf("error writing in tfs_writeFile\n");
 		return EWRITE;
@@ -557,7 +585,6 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 	writeDataToFiles(blocks, head, size, buffer);
 
 	resetOffset(FD);
-	printf("inode %d\n", inode.file_size);
 
 	return SUCCESS;
 }
@@ -575,7 +602,6 @@ int getFreeBlocks(int nbr, int index_free, int free_blocks) {
 			return EREAD;
 		}
 		free = (freeblock*) (b.buffer);
-		printf("next %d\n", free->next_block);
 		file = newFileBlock(free->next_block);
 
 		if (writeBlock(diskNO, index_free, &file) == 1) {
@@ -598,8 +624,6 @@ int getFreeBlocks(int nbr, int index_free, int free_blocks) {
 		printf("error writing in getFreeBlocks\n");
 		return EWRITE;
 	}
-
-	printf("free blocks %d\n", free_blocks);
 
 	return headFreeBlock;
 }

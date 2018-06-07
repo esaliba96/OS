@@ -112,5 +112,6 @@ int getLastFreeBlock();
 int countBlocks(int inode_addr);
 int tfs_rename(int FD, char* new_name);
 int tfr_readdir();
+int testSuite1(char * fs_name);
 
 #endif
