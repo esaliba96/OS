@@ -383,14 +383,14 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 	} 
 
 	inode.file_pointer = free;
+	int freeMem = inode.file_size % DATABLOCKSIZE + free_blocks * DATABLOCKSIZE;
 	printf("inode %d\n", inode.file_pointer);
+	inode.file_size += size;
 
 	if (writeBlock(diskNO, block_nbr, &inode) == 1) {
 		printf("error writing in tfs_writeFile\n");
 		return EWRITE;
 	}
-
-	int freeMem = inode.file_size % DATABLOCKSIZE + free_blocks * DATABLOCKSIZE;
 
 	if (size > freeMem) {
 		return EOUTOFMEM;
