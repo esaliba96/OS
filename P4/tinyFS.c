@@ -64,11 +64,21 @@ int resetOffset(int fd){
 	return 0;
 }
 
-int setOffset(int fd, uint64_t offset){
+int setOffset(int fd, int offset){
 	while(head != NULL) {
 		if (head->data == fd) {
 			head->offset = offset;
 			return 1;
+		} 
+		head = head->next;
+	}
+	return 0;
+}
+
+int getOffset(int fd) {
+	while(head != NULL) {
+		if (head->data == fd) {
+			return head->offset;
 		} 
 		head = head->next;
 	}
@@ -366,7 +376,7 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 	printf("block nbr %d\n", block_nbr);
 	
 	free = root.free_block_pointer;
-	printf("block %d\n", free);
+	printf("block %d\n", free)	;
 
 	if (readBlock(diskNO, block_nbr, &inode) == -1) {
 		return EREAD;
@@ -386,7 +396,7 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 		return EOUTOFMEM;
 	}
 
-	int blocks = blocksNeeded(size); 
+	int blocks = blockSize(size); 
 	
 	int head = getFreeBlocks(blocks, free, free_blocks);
 
@@ -440,16 +450,16 @@ int getFreeBlocks(int nbr, int index_free, int free_blocks) {
 	return headFreeBlock;
 }
 
-int blocksNeeded(int size) {
-	int blocksNeeded;
+int blockSize(int size) {
+	int blockSize;
 
 	if (size % DATABLOCKSIZE != 0) {
-		blocksNeeded = size/DATABLOCKSIZE + 1; 
+		blockSize = size/DATABLOCKSIZE + 1; 
 	} else {
-		blocksNeeded = size/DATABLOCKSIZE;
+		blockSize = size/DATABLOCKSIZE;
 	}
 
-	return blocksNeeded;
+	return blockSize;
 }
 
 int writeDataToFiles(int blockNbr, int head, int size, uint8_t* buffer) {
@@ -482,4 +492,67 @@ int writeDataToFiles(int blockNbr, int head, int size, uint8_t* buffer) {
 	}
 
 	return SUCCESS;
+}
+
+int tfs_seek(fileDescriptor FD, int offset) {
+	inodeblock inode;
+	int block_nbr;
+
+	if (!containsFD(head, FD)) {
+		return EFD;
+	}
+
+	block_nbr = getBlockNbr(head, FD);
+	if (readBlock(diskNO, block_nbr, &inode) == -1) {
+		return EREAD;
+	} 
+
+	if (blockSize(inode.file_size) >= blockSize(offset)) {
+		setOffset(FD, offset);
+		return SUCCESS;
+	}
+}
+
+int tfs_readByte(fileDescriptor FD, char *buffer) {
+	inodeblock inode;
+	int block_nbr;
+	fileblock file;
+
+	if (!containsFD(head, FD)) {
+		return EFD;
+	}
+
+	block_nbr = getBlockNbr(head, FD);
+
+	if (readBlock(diskNO, block_nbr, &inode) == -1) {
+		return EREAD;
+	} 
+
+	int offset = getOffset(FD);
+	int dataBlock = getOffsetBlock(inode.file_pointer, offset);
+
+	if (readBlock(diskNO, dataBlock, &file) == -1) {
+    	return EREAD;
+   	}
+
+   *buffer = file.buffer[offset % DATABLOCKSIZE];
+   	offset++;
+  	setOffset(FD, offset);
+
+   	return SUCCESS;
+}
+
+int getOffsetBlock(int head, int offset) {
+	fileblock file;
+	int i = 0 , block_nbr = offset / DATABLOCKSIZE;
+
+   	for (; i < block_nbr; i++) {
+    	if (readBlock(diskNO, head, &file) == -1) {
+        	return EREAD;
+      	}
+
+      	head = file.next_block;
+   }
+
+   return head;
 }

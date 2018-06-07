@@ -100,10 +100,12 @@ fdNode* add(fdNode* head, int data, uint8_t blockNbr, uint64_t offset);
 int removeNode(fdNode* head, int data);
 int containsFD(fdNode* head, int fd);
 int resetOffset(int fd);
-int setOffset(int fd, uint64_t offset);
+int setOffset(int fd, int offset);
 int getBlockNbr(fdNode* head, int fd);
 int getFreeBlocks(int nbr, int index_free, int);
 int writeDataToFiles(int blockNbr, int head, int size, uint8_t* buffer);
-int blocksNeeded(int size);
+int blockSize(int size);
+int getOffsetBlock(int head, int offset);
+int getOffset(int fd);
 
 #endif
