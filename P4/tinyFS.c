@@ -1,7 +1,5 @@
 #include "tinyFS.h"
 
-fdNode* head = NULL;
-
 fdNode* create(int data, fdNode* next, uint8_t blockNbr, uint64_t offset) {
     fdNode* new_node = (fdNode*)malloc(sizeof(fdNode));
     
@@ -17,14 +15,14 @@ fdNode* create(int data, fdNode* next, uint8_t blockNbr, uint64_t offset) {
     return new_node;
 }
 
-fdNode* add(int data, uint8_t blockNbr, uint64_t offset) {
+fdNode* add(fdNode* head, int data, uint8_t blockNbr, uint64_t offset) {
  	fdNode* new_node = create(data, head, blockNbr, offset);
     head = new_node;
     
     return head;
 }
 
-int removeNode(int data) {
+int removeNode(fdNode* head, int data) {
 	fdNode *curr, *prev;
   	prev = NULL;
 
@@ -43,7 +41,7 @@ int removeNode(int data) {
   	return FAILURE;
 }
 
-int containsFD(int fd) {
+int containsFD(fdNode* head, int fd) {
 	while(head != NULL) {
 		if (head->data == fd) {
 			return 1;
@@ -53,7 +51,7 @@ int containsFD(int fd) {
 	return 0;
 }
 
-int resetOffset(int fd){
+int resetOffset(fdNode* head, int fd){
 	while(head != NULL) {
 		if (head->data == fd) {
 			head->offset = 0;
@@ -64,7 +62,7 @@ int resetOffset(int fd){
 	return 0;
 }
 
-int setOffset(int fd, int offset){
+int setOffset(fdNode* head, int fd, int offset){
 	while(head != NULL) {
 		if (head->data == fd) {
 			head->offset = offset;
@@ -75,7 +73,7 @@ int setOffset(int fd, int offset){
 	return 0;
 }
 
-int getOffset(int fd) {
+int getOffset(fdNode* head, int fd) {
 	while(head != NULL) {
 		if (head->data == fd) {
 			return head->offset;
@@ -85,7 +83,7 @@ int getOffset(int fd) {
 	return 0;
 }
 
-int getBlockNbr(int fd) {
+int getBlockNbr(fdNode* head, int fd) {
 	while (head != NULL) {
 		if (head->data == fd) {
 			return head->blockNbr;
@@ -198,14 +196,14 @@ int tfs_openFile(char *name){
 
 	int block_no;
 	if((block_no = locateFile(name))!= EFILENOTFOUND){
-		head = add(file_descriptor_bucket,block_no,0);
+		list = add(list, file_descriptor_bucket,block_no,0);
 		return file_descriptor_bucket++;
 	} 
 	block_no = newFile(name);
 	if(block_no < 0){
 		return block_no;
 	}
-	head = add(file_descriptor_bucket,block_no,0);
+	list = add(list, file_descriptor_bucket,block_no,0);
 	return file_descriptor_bucket++;
 
 }
@@ -265,7 +263,7 @@ int tfs_deleteFile(fileDescriptor FD){
 	int files_to_return;
 	int last_free_block;
 
-	err = containsFD(FD);
+	err = containsFD(list, FD);
 	if(err == 0){
 		return EFILENOTFOUND;
 	}
@@ -275,7 +273,7 @@ int tfs_deleteFile(fileDescriptor FD){
 	}
 
 	pointer_to_inode = root.root_inode;
-	file_block_no = getBlockNbr(FD);
+	file_block_no = getBlockNbr(list, FD);
 	
 	if((readBlock(diskNO, pointer_to_inode, &iterator)) == -1){//get inode of file to be deleted
 		return EREAD;
@@ -471,10 +469,10 @@ int main(){
 	// head = add(5, 42,0);
 	// head = add(6, 32,0);
 
-	 // fs = tfs_openFile("fucker");
-	 // tfs_openFile("tits");
-	 // tfs_openFile("asss");
-	 // tfs_openFile("niggas");
+	 fs = tfs_openFile("fucker");
+	  tfs_openFile("tits");
+	  tfs_openFile("asss");
+	  tfs_openFile("niggas");
 	
 	// while (head) {
 	// 	printf("%d\n", head->blockNbr);
@@ -486,7 +484,7 @@ int main(){
 	//tfs_writeFile(fs, "hello", 955);
 	//tfs_deleteFile(fs);
 	//tfs_rename(fs, "hello");
-	// tfr_readdir();
+	 tfs_readdir();
 	// //printf("address of last block %d\n", getLastFreeBlock());
 	// while(head != NULL) {
 	// 	printf("id: %d\n", head->data);
@@ -519,15 +517,17 @@ int testSuite1(char * fs_name){
 	tfs_mount(fs_name);
 	fd = tfs_openFile("file1");
 	fd2 = tfs_openFile("file2");
+	printf("file1: %d, file2: %d\n",fd,fd2);
 	tfs_writeFile(fd, first_string, strlen(first_string));
 	tfs_writeFile(fd2, second_string, strlen(second_string));
 	fd3 = tfs_openFile("file3");
+	tfs_readdir();
 	return 0;
 }
 
 
 int tfs_closeFile(fileDescriptor FD){
-	if (removeNode(FD)) {
+	if (removeNode(list, FD)) {
 		return SUCCESS;	
 	}
 	return EFD;
@@ -540,7 +540,7 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 	int block_nbr;
 	int free;
 
-	if (!containsFD(FD)) {
+	if (!containsFD(list, FD)) {
 		return EFD;
 	}
 
@@ -555,8 +555,7 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 	}
 
 	free_blocks = root.free_block_count;
-	block_nbr = getBlockNbr(FD);
-	
+	block_nbr = getBlockNbr(list, FD);
 	
 	free = root.free_block_pointer;
 
@@ -580,11 +579,11 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 
 	int blocks = blockSize(size); 
 	
-	int head = getFreeBlocks(blocks, free, free_blocks);
+	int head1 = getFreeBlocks(blocks, free, free_blocks);
 
-	writeDataToFiles(blocks, head, size, buffer);
+	writeDataToFiles(blocks, head1, size, buffer);
 
-	resetOffset(FD);
+	resetOffset(list, FD);
 
 	return SUCCESS;
 }
@@ -676,17 +675,17 @@ int tfs_seek(fileDescriptor FD, int offset) {
 	inodeblock inode;
 	int block_nbr;
 
-	if (!containsFD(FD)) {
+	if (!containsFD(list, FD)) {
 		return EFD;
 	}
 
-	block_nbr = getBlockNbr(FD);
+	block_nbr = getBlockNbr(list, FD);
 	if (readBlock(diskNO, block_nbr, &inode) == -1) {
 		return EREAD;
 	} 
 
 	if (blockSize(inode.file_size) >= blockSize(offset)) {
-		setOffset(FD, offset);
+		setOffset(list, FD, offset);
 		return SUCCESS;
 	}
 }
@@ -696,17 +695,17 @@ int tfs_readByte(fileDescriptor FD, char *buffer) {
 	int block_nbr;
 	fileblock file;
 
-	if (!containsFD(FD)) {
+	if (!containsFD(list, FD)) {
 		return EFD;
 	}
 
-	block_nbr = getBlockNbr(FD);
+	block_nbr = getBlockNbr(list, FD);
 
 	if (readBlock(diskNO, block_nbr, &inode) == -1) {
 		return EREAD;
 	} 
 
-	int offset = getOffset(FD);
+	int offset = getOffset(list, FD);
 	int dataBlock = getOffsetBlock(inode.file_pointer, offset);
 
 	if (readBlock(diskNO, dataBlock, &file) == -1) {
@@ -715,7 +714,7 @@ int tfs_readByte(fileDescriptor FD, char *buffer) {
 
    *buffer = file.buffer[offset % DATABLOCKSIZE];
    	offset++;
-  	setOffset(FD, offset);
+  	setOffset(list, FD, offset);
 
    	return SUCCESS;
 }
@@ -737,7 +736,7 @@ int getOffsetBlock(int head, int offset) {
 
 int tfs_rename(int FD, char* new_name) {
 	inodeblock inode;
-	int nbr = getBlockNbr(FD);
+	int nbr = getBlockNbr(list, FD);
 
 	if (readBlock(diskNO, nbr, &inode) == -1) {
 		return EREAD;
@@ -756,12 +755,13 @@ int tfs_rename(int FD, char* new_name) {
 	return SUCCESS;
 }
 
-int tfr_readdir() {
+int tfs_readdir() {
 	int nbr;
 	inodeblock inode;
+	fdNode * head = list;
 
 	while(head != NULL) {
-		nbr = getBlockNbr(head->data);
+		nbr = getBlockNbr(list, head->data);
 
 		if (readBlock(diskNO, nbr, &inode) == -1) {
 			return EREAD;
