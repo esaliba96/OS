@@ -314,6 +314,7 @@ int tfs_deleteFile(fileDescriptor FD){
 	if (writeBlock(diskNO, last_free_block, &current_last) == 1) {
 		return EWRITE;
 	}
+	removeNode(list,FD);
 	return 0;
 }
 
@@ -465,8 +466,9 @@ int locateFile(char *name){
 
 int main(){
 	int fs;
-//	tfs_mkfs("temp",10240);
-	printf("%i\n",tfs_mount("temp"));
+	tfs_mkfs("temp",10240);
+	testSuite1("temp");
+	//printf("%i\n",tfs_mount("temp"));
 
 	// head = add(1, 7,0);
 	// head = add(2, 8,0);
@@ -475,7 +477,7 @@ int main(){
 	// head = add(5, 42,0);
 	// head = add(6, 32,0);
 
-	fs = tfs_openFile("hello");
+	//s = tfs_openFile("hello");
 	//printf("file_d: %d\n", fs);
 //	 tfs_openFile("tits");
 //	 tfs_openFile("asss");
@@ -491,9 +493,9 @@ int main(){
 	//tfs_writeFile(fs, "hello", 955);
 	//tfs_deleteFile(fs);
 	//printf("fd %d\n", fs);
-	tfs_rename(fs, "hello2");
+	//tfs_rename(fs, "hello2");
 	//tfr_readdir();
-	tfs_readFileInfo(fs);
+	//tfs_readFileInfo(fs);
 	//printf("address of last block %d\n", getLastFreeBlock());
 	//tfs_rename(fs, "hello");
 //	 tfs_readdir();
@@ -504,7 +506,7 @@ int main(){
 	// }
 	// printf("%i\n",tfs_mount("temp"));
 
-	printf("%i\n",tfo_unmount());
+	//printf("%i\n",tfo_unmount());
 
 	// fs = tfs_openFile("fucker");
 
@@ -535,7 +537,10 @@ int testSuite1(char * fs_name){
 	tfs_writeFile(fd, first_string, strlen(first_string));
 	tfs_writeFile(fd2, second_string, strlen(second_string));
 	fd3 = tfs_openFile("file3");
+	tfs_writeFile(fd3, first_string, strlen(first_string));
 	tfs_readdir();
+
+	tfo_unmount();
 	return 0;
 }
 
@@ -581,7 +586,7 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 	int freeMem = inode.file_size % DATABLOCKSIZE + free_blocks * DATABLOCKSIZE;
 	inode.file_size += (uint32_t)size;
 	inode.mTime = time(NULL);
-	printf("file size %d\n", inode.file_size);
+	//printf("file size %d\n", inode.file_size);
 
 	if (writeBlock(diskNO, block_nbr, &inode) == 1) {
 		printf("error writing in tfs_writeFile\n");
@@ -617,6 +622,9 @@ int getFreeBlocks(int nbr, int index_free, int free_blocks) {
 		}
 		free = (freeblock*) (b.buffer);
 		file = newFileBlock(free->next_block);
+		if(i == (nbr - 1)){
+			file.next_block = 0x00;
+		}
 
 		if (writeBlock(diskNO, index_free, &file) == 1) {
 			return EWRITE;
@@ -787,8 +795,9 @@ int tfs_readdir() {
 		if (readBlock(diskNO, nbr, &inode) == -1) {
 			return EREAD;
 		}
-
-		printf("file: %s\n", inode.filename);
+		if(inode.blocktype == 0x02){
+			printf("file: %s\n", inode.filename);
+		}
 		head = head->next; 
 	}
 
@@ -805,7 +814,7 @@ int tfs_readFileInfo(fileDescriptor FD) {
 		return EREAD;
 	}
 	
-	printf("file: %s\n", inode.filename);
+	//printf("file: %s\n", inode.filename);
 //		printf("create: %d\n", inode.cTime);
 	struct tm tm = *localtime(&inode.cTime);
 	printf("created: %d-%d-%d %d:%d:%d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
