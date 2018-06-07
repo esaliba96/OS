@@ -111,5 +111,6 @@ int getOffset(int fd);
 int getLastFreeBlock();
 int countBlocks(int inode_addr);
 int tfs_rename(int FD, char* new_name);
+int tfr_readdir();
 
 #endif

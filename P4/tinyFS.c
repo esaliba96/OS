@@ -193,11 +193,11 @@ block init_blocks(int type){
 
 
 int tfs_openFile(char *name){
-	static int file_descriptor_bucket;
+	static int file_descriptor_bucket = 0;
 	inodeblock new_inode;
 
 	int block_no;
-	if((block_no = locateFile(name))!=EFILENOTFOUND){
+	if((block_no = locateFile(name))!= EFILENOTFOUND){
 		head = add(file_descriptor_bucket,block_no,0);
 		return file_descriptor_bucket++;
 	} 
@@ -464,27 +464,34 @@ int main(){
 	printf("%i\n",tfs_mount("temp"));
 	//printf("%i\n",tfo_unmount());
 
-	// head = add(head, 1, 7);
-	// head = add(head, 2, 8);
-	// head = add(head, 3, 4);
-	// head = add(head, 4, 42);
-	// head = add(head, 5, 42);
-	// head = add(head, 6, 32);
+	// head = add(1, 7,0);
+	// head = add(2, 8,0);
+	// head = add(3, 4,0);
+	// head = add(4, 42,0);
+	// head = add(5, 42,0);
+	// head = add(6, 32,0);
 
-	fs = tfs_openFile("fucker");
+	 fs = tfs_openFile("fucker");
+	 tfs_openFile("tits");
+	 tfs_openFile("asss");
+	 tfs_openFile("niggas");
 	
 	// while (head) {
 	// 	printf("%d\n", head->blockNbr);
 	// 	head = head->next;
 	// }
 
-	tfs_writeFile(fs, "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll", 639);
+	//tfs_writeFile(fs, "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll", 639);
 
 	//tfs_writeFile(fs, "hello", 955);
 	//tfs_deleteFile(fs);
-	printf("name: %s\n", tfs_rename(fs, "hello"));
+	//tfs_rename(fs, "hello");
+	tfr_readdir();
 	//printf("address of last block %d\n", getLastFreeBlock());
-
+	while(head != NULL) {
+		printf("id: %d\n", head->data);
+		head =head->next;
+	}
 	return 0;
 }
 
@@ -531,8 +538,9 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 	inode.file_pointer = free;
 	int freeMem = inode.file_size % DATABLOCKSIZE + free_blocks * DATABLOCKSIZE;
 	printf("inode %d\n", inode.file_pointer);
-	inode.file_size += size;
-
+	inode.file_size += (uint32_t)size;
+	//inode.file_size = (uint32_t)inode.file_size;
+	printf("file size %d\n", inode.file_size);
 	if (writeBlock(diskNO, block_nbr, &inode) == 1) {
 		printf("error writing in tfs_writeFile\n");
 		return EWRITE;
@@ -711,5 +719,34 @@ int tfs_rename(int FD, char* new_name) {
 		return EREAD;
 	} 
 
-	printf("%s\n", inode.filename);
+	//printf("size: %d\n", inode.file_size);
+	memset(inode.filename, '\0', 9*sizeof(char));
+	strcpy(inode.filename, new_name);
+	// printf("new name: %s\n", inode.filename);
+
+
+	if (writeBlock(diskNO, nbr, &inode) == 1) {
+		return EWRITE;
+	}
+
+	return SUCCESS;
+}
+
+int tfr_readdir() {
+	int nbr;
+	inodeblock inode;
+
+	while(head != NULL) {
+		nbr = getBlockNbr(head->data);
+
+		if (readBlock(diskNO, nbr, &inode) == -1) {
+			return EREAD;
+		}
+
+		printf("file: %s\n", inode.filename);
+
+		head = head->next; 
+	}
+
+	return SUCCESS;
 }
