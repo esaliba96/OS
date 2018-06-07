@@ -481,8 +481,9 @@ int main(){
 	tfs_writeFile(fs, "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll", 639);
 
 	//tfs_writeFile(fs, "hello", 955);
-	tfs_deleteFile(fs);
-	printf("address of last block %d\n", getLastFreeBlock());
+	//tfs_deleteFile(fs);
+	printf("name: %s\n", tfs_rename(fs, "hello"));
+	//printf("address of last block %d\n", getLastFreeBlock());
 
 	return 0;
 }
@@ -703,5 +704,12 @@ int getOffsetBlock(int head, int offset) {
 }
 
 int tfs_rename(int FD, char* new_name) {
+	inodeblock inode;
 	int nbr = getBlockNbr(FD);
+
+	if (readBlock(diskNO, nbr, &inode) == -1) {
+		return EREAD;
+	} 
+
+	printf("%s\n", inode.filename);
 }
