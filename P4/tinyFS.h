@@ -96,12 +96,12 @@ fileblock newFileBlock(uint8_t next_block_offset);
 inodeblock newInode(char *name, uint8_t fp);
 int tfs_seek(fileDescriptor FD, int offset);
 fdNode* create(int data, fdNode* next, uint8_t blockNbr, uint64_t offset);
-fdNode* add(fdNode* head, int data, uint8_t blockNbr, uint64_t offset);
-int removeNode(fdNode* head, int data);
-int containsFD(fdNode* head, int fd);
+fdNode* add(int data, uint8_t blockNbr, uint64_t offset);
+int removeNode(int data);
+int containsFD(int fd);
 int resetOffset(int fd);
 int setOffset(int fd, int offset);
-int getBlockNbr(fdNode* head, int fd);
+int getBlockNbr(int fd);
 void clearBlocks(int first_block, int to_clear);
 int getFreeBlocks(int nbr, int index_free, int);
 int writeDataToFiles(int blockNbr, int head, int size, uint8_t* buffer);
@@ -110,5 +110,6 @@ int getOffsetBlock(int head, int offset);
 int getOffset(int fd);
 int getLastFreeBlock();
 int countBlocks(int inode_addr);
+int tfs_rename(int FD, char* new_name);
 
 #endif
