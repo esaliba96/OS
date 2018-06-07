@@ -263,7 +263,7 @@ int tfs_deleteFile(fileDescriptor FD){
 	int file_block_no;
 	int pointer_to_inode;
 	int files_to_return;
-	int last_free_block
+	int last_free_block;
 
 	err = containsFD(head, FD);
 	if(err == 0){
@@ -281,19 +281,19 @@ int tfs_deleteFile(fileDescriptor FD){
 		return EREAD;
 	}
 
-	while(iterator.next_block!=file_block_no){//locate the inode pointing to the inode that will be deleted
-		if((readBlock(diskNO, iterator.next_block, &iterator)) == -1){
+	while(iterator.next_inode!=file_block_no){//locate the inode pointing to the inode that will be deleted
+		if((readBlock(diskNO, iterator.next_inode, &iterator)) == -1){
 			return EREAD;
 		}
-		if(iterator.next_block!=file_block_no){
-			pointer_to_inode = iterator.next_block;
+		if(iterator.next_inode!=file_block_no){
+			pointer_to_inode = iterator.next_inode;
 		}
 	}
 
 	if((readBlock(diskNO, file_block_no, &inode)) == -1){//get inode of file to be deleted
 		return EREAD;
 	}
-	iterator.next_block = inode.next_block; // removing the inode from the inode list
+	iterator.next_inode = inode.next_inode; // removing the inode from the inode list
 	last_free_block = getLastFreeBlock();
 	
 	if((readBlock(diskNO, last_free_block, &current_last)) == -1){ //get the current last freeblock in the list
@@ -328,7 +328,7 @@ int countBlocks(int inode_addr){
 	if((readBlock(diskNO, inode_addr, &inode)) == -1){//get inode of file to be deleted
 		return EREAD;
 	}
-	addr = inode.next_block;
+	addr = inode.file_pointer;
 	do{
 		if((readBlock(diskNO, addr, &counter)) == -1){//get inode of file to be deleted
 			return EREAD;
@@ -343,17 +343,22 @@ int countBlocks(int inode_addr){
 
 void clearBlocks(int first_block, int to_clear){
 	fileblock to_clear_block;
+	inodeblock temp;
 	int next = first_block;
+	int temp_addr;
 
 	while(to_clear > 0){
 		if((readBlock(diskNO, next, &to_clear_block)) == -1){ //get the current last freeblock in the list
-			return EREAD;
+			return;
+		}
+		if(to_clear_block.blocktype == 0x02){
+			to_clear_block.next_block = to_clear_block.buffer[13];
 		}
 		memset(&to_clear_block.buffer,0,253);
 		to_clear_block.blocktype = 0x04;
 		if (writeBlock(diskNO, next, &to_clear_block) == 1) {
 			printf("error writing in tfs_writeFile\n");
-			return EWRITE;
+			return;
 		}
 		next = to_clear_block.next_block;
 		to_clear--;
@@ -475,7 +480,8 @@ int main(){
 
 	tfs_writeFile(fs, "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll", 639);
 
-	tfs_writeFile(fs, "hello", 955);
+	//tfs_writeFile(fs, "hello", 955);
+	tfs_deleteFile(fs);
 	printf("address of last block %d\n", getLastFreeBlock());
 
 	return 0;
