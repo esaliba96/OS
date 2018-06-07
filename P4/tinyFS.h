@@ -60,7 +60,8 @@ typedef struct inodeblock{
 	uint64_t cTime;
 	uint64_t aTime;
 	uint64_t mTime;
-	uint8_t buffer[BLOCKSIZE-35];
+	uint8_t RO;
+	uint8_t buffer[BLOCKSIZE-34];
 }__attribute__((packed)) inodeblock;
 
 typedef struct superblock{
@@ -116,6 +117,10 @@ int tfs_rename(int FD, char* new_name);
 int tfs_readFileInfo(fileDescriptor FD);
 int tfs_readdir();
 int testSuite1(char * fs_name);
+int find_file(char* name);
+int tfs_makeRO(char *name);
+int tfs_makeRW(char *name);
+int tfs_writeByte(fileDescriptor FD, char* data); 
 
 int diskNO;
 fdNode* list = NULL;

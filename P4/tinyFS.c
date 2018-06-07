@@ -264,6 +264,7 @@ int tfs_deleteFile(fileDescriptor FD){
 	int last_free_block;
 
 	err = containsFD(list, FD);
+	
 	if(err == 0){
 		return EFILENOTFOUND;
 	}
@@ -291,6 +292,12 @@ int tfs_deleteFile(fileDescriptor FD){
 	if((readBlock(diskNO, file_block_no, &inode)) == -1){//get inode of file to be deleted
 		return EREAD;
 	}
+
+	if (inode.RO == 1) {
+		printf("Cannot delete RO file: %s\n", inode.filename);
+		return FAILURE;
+	}
+
 	iterator.next_inode = inode.next_inode; // removing the inode from the inode list
 	last_free_block = getLastFreeBlock();
 	
@@ -408,6 +415,7 @@ inodeblock newInode(char *name, uint8_t fp){
 	to_return.cTime = t;
 	to_return.aTime = t;
 	to_return.mTime = t;
+	to_return.RO = 0;
 
 	return to_return;
  }
@@ -465,7 +473,7 @@ int locateFile(char *name){
 
 int main(){
 	int fs;
-//	tfs_mkfs("temp",10240);
+	tfs_mkfs("temp",10240);
 	printf("%i\n",tfs_mount("temp"));
 
 	// head = add(1, 7,0);
@@ -476,6 +484,9 @@ int main(){
 	// head = add(6, 32,0);
 
 	fs = tfs_openFile("hello");
+	tfs_makeRO("hello");
+	tfs_deleteFile(fs);
+	tfs_makeRW("hello");
 	//printf("file_d: %d\n", fs);
 //	 tfs_openFile("tits");
 //	 tfs_openFile("asss");
@@ -486,14 +497,14 @@ int main(){
 	// 	head = head->next;
 	// }
 
-	//tfs_writeFile(fs, "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll", 639);
-
+	int i = tfs_writeFile(fs, "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll", 639);
+	printf("success: %d\n", i);
 	//tfs_writeFile(fs, "hello", 955);
 	//tfs_deleteFile(fs);
 	//printf("fd %d\n", fs);
-	tfs_rename(fs, "hello2");
+//	tfs_rename(fs, "hello8");
 	//tfr_readdir();
-	tfs_readFileInfo(fs);
+//	tfs_readFileInfo(fs);
 	//printf("address of last block %d\n", getLastFreeBlock());
 	//tfs_rename(fs, "hello");
 //	 tfs_readdir();
@@ -503,8 +514,8 @@ int main(){
 	// 	head =head->next;
 	// }
 	// printf("%i\n",tfs_mount("temp"));
-
-	printf("%i\n",tfo_unmount());
+	//printf("found %d\n", find_file("hello2"));
+	//printf("%i\n", tfo_unmount());
 
 	// fs = tfs_openFile("fucker");
 
@@ -576,6 +587,11 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 	if (readBlock(diskNO, block_nbr, &inode) == -1) {
 		return EREAD;
 	} 
+
+	if (inode.RO == 1) {
+		printf("Cannot write to RO file: %s\n", inode.filename);
+		return FAILURE;
+	}
 
 	inode.file_pointer = free;
 	int freeMem = inode.file_size % DATABLOCKSIZE + free_blocks * DATABLOCKSIZE;
@@ -699,6 +715,12 @@ int tfs_seek(fileDescriptor FD, int offset) {
 		return EREAD;
 	} 
 
+	inode.aTime = time(NULL);
+
+  	if (writeBlock(diskNO, block_nbr, &inode) == 1) {
+		return EWRITE;
+	}
+
 	if (blockSize(inode.file_size) >= blockSize(offset)) {
 		setOffset(list, FD, offset);
 		return SUCCESS;
@@ -757,6 +779,11 @@ int getOffsetBlock(int head, int offset) {
 
 int tfs_rename(int FD, char* new_name) {
 	inodeblock inode;
+
+	if (!containsFD(list, FD)) {
+		return EFD;
+	}
+
 	int nbr = getBlockNbr(list, FD);
 
 	if (readBlock(diskNO, nbr, &inode) == -1) {
@@ -815,4 +842,78 @@ int tfs_readFileInfo(fileDescriptor FD) {
 	printf("modified: %d-%d-%d %d:%d:%d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 
 	return SUCCESS;
+}
+
+int find_file(char* name) {
+	inodeblock inode;
+	int next;
+
+	if (readBlock(diskNO, ROOTINODEADDR, &inode) == -1) {
+		return EREAD;
+	}
+	next = inode.next_inode;
+
+	while (next != 0) {
+		if (readBlock(diskNO, inode.next_inode, &inode) == -1) {
+			return EREAD;
+		}
+		if (strcmp(inode.filename, name) == 0) {
+			return next;
+		}
+		
+		next = inode.next_inode;
+	}
+
+	return FAILURE;
+}
+
+int tfs_makeRO(char *name) {
+	int nbr = find_file(name);
+
+	if (nbr == FAILURE) {
+		printf("File not found %s\n", name);
+		return FAILURE;
+	}
+
+	inodeblock inode;
+
+	if (readBlock(diskNO, nbr, &inode) == -1) {
+		return EREAD;
+	}
+	inode.RO = 1;
+
+	if (writeBlock(diskNO, nbr, &inode) == 1) {
+		return EWRITE;
+	}
+
+	return SUCCESS;
+}
+
+int tfs_makeRW(char *name) {
+	int nbr = find_file(name);
+
+	if (nbr == FAILURE) {
+		printf("File not found %s\n", name);
+		return FAILURE;
+	}
+
+	inodeblock inode;
+
+	if (readBlock(diskNO, nbr, &inode) == -1) {
+		return EREAD;
+	}
+	inode.RO = 0;
+
+	if (writeBlock(diskNO, nbr, &inode) == 1) {
+		return EWRITE;
+	}
+
+	return SUCCESS;
+}
+
+int tfs_writeByte(fileDescriptor FD, char* data) {
+	if (!containsFD(list, FD)) {
+		return EFD;
+	}
+
 }
