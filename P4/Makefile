@@ -4,7 +4,7 @@ CFLAGS = -g
 all: fs_Sim
 
 fs_Sim: tinyFS.c
-	$(CC) $(CFLAGS) -o fs_Sim tinyFS.c libDisk.c
+	$(CC) $(CFLAGS) -o fs_Sim libTinyFS.c libDisk.c
 
 clean:
 			rm -f fs_Sim

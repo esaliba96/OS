@@ -1,5 +1,5 @@
-#ifndef _tinyFS_H_
-#define _tinyFS_H
+#ifndef _libTinyFS_H_
+#define _libTinyFS_H
 
 #include <stdio.h>
 #include <stdint.h>

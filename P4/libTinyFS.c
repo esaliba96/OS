@@ -1,4 +1,4 @@
-#include "tinyFS.h"
+#include "libTinyFS.h"
 
 fdNode* create(int data, fdNode* next, uint8_t blockNbr, uint64_t offset) {
     fdNode* new_node = (fdNode*)malloc(sizeof(fdNode));
@@ -472,7 +472,7 @@ int locateFile(char *name){
 	return EFILENOTFOUND;
 }
 
-// int main(){
+ int main(){
 // 	int fs, i;
 // 	tfs_mkfs("temp",10240);
 	//testSuite1("temp");
@@ -538,8 +538,8 @@ int locateFile(char *name){
 	// tfs_writeFile(fs, "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll", 639);
 
 	// tfs_deleteFile(fs);
-// 	return 0;
-// }
+ 	return 0;
+ }
 
 int tfs_closeFile(fileDescriptor FD){
 	if (removeNode(list, FD)) {
