@@ -1,10 +1,29 @@
-CC = gcc
-CFLAGS = -g
+LIBS =
+OFILES = tinyFS.o libDisk.o
 
-all: fs_Sim
+#append a 32 to executable name if on a 32 bit machine
+FILE =
+ARCH = $(shell arch)
+ifeq ("$(ARCH)", "i686")
+   FILE = 32
+endif
 
-fs_Sim: tinyFS.c
-	$(CC) $(CFLAGS) -o fs_Sim tinyFS.c libDisk.c
+all:	$(FILE) fs_Sim$(FILE) cleano
+
+32: 
+	# to make life easier - automatically deletes .o's that were most likely created on a 64 bit machine
+	# assumes you are doing most of your development on 64 bit machines
+	rm -f *.o
+
+
+fs_Sim$(FILE): frontEnd.c tinyFS.o libDisk.o
+	$(CC) $(CFLAGS)-o osSim$(FILE) frontEnd.c $(OFILES) $(LIBS)
+
+.c.o:
+	gcc -c $(CFLAGS) $< -o $@ $(LIBS)
+
+cleano:
+	rm -f *.o
 
 clean:
-			rm -f fs_Sim
+	rm -f osSim *.o
