@@ -472,11 +472,15 @@ int locateFile(char *name){
 	return EFILENOTFOUND;
 }
 
-int main(){
-	int fs;
-	tfs_mkfs("temp",10240);
+// int main(){
+// 	int fs, i;
+// 	tfs_mkfs("temp",10240);
 	//testSuite1("temp");
-	printf("%i\n",tfs_mount("temp"));
+	// char first_string[253];
+	// for(i = 0; i < 253; i++){
+	// 	first_string[i] = 'l';
+	// }
+	// printf("%i\n",tfs_mount("temp"));
 //	printf("%i\n",tfs_mount("temp"));
 
 	// head = add(1, 7,0);
@@ -486,7 +490,7 @@ int main(){
 	// head = add(5, 42,0);
 	// head = add(6, 32,0);
 
-	fs = tfs_openFile("hello");
+//	fs = tfs_openFile("hello");
 //	tfs_makeRO("hello");
 //	tfs_deleteFile(fs);
 //	tfs_makeRW("hello");
@@ -500,20 +504,22 @@ int main(){
 	// 	head = head->next;
 	// }
 
-	int i = tfs_writeFile(fs, "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll", 639);
+	//int i = tfs_writeFile(fs, "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll", 639);
 //	printf("success: %d\n", i);
-	tfs_seek(fs, 6);
-	tfs_writeByte(fs, 'p');
-	char a[0];
-	tfs_seek(fs, 6);
-	tfs_readByte(fs, a);
-	printf("char: %s\n", a);
+	// tfs_writeFile(fs, first_string, 254);
+	// tfs_seek(fs, 252);
+	// tfs_writeByte(fs, 'p');
+	// tfs_writeByte(fs, 'p');
+	// char a[0];
+	// tfs_seek(fs, 6);
+	// tfs_readByte(fs, a);
+	// printf("char: %s\n", a);
 	//tfs_writeFile(fs, "hello", 955);
 	//tfs_deleteFile(fs);
 	//printf("fd %d\n", fs);
 	//tfs_rename(fs, "hello2");
 	//tfr_readdir();
-	//tfs_readFileInfo(fs);
+//	tfs_readFileInfo(fs);
 //	tfs_rename(fs, "hello8");
 	//tfr_readdir();
 //	tfs_readFileInfo(fs);
@@ -532,37 +538,8 @@ int main(){
 	// tfs_writeFile(fs, "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll", 639);
 
 	// tfs_deleteFile(fs);
-	return 0;
-}
-
-int testSuite1(char * fs_name){
-	int i;
-	int fd;
-	int fd2;
-	int fd3;
-	char first_string[983];
-	char second_string[583];
-	for(i = 0; i < 983; i++){
-		first_string[i] = 'e';
-	}
-	for(i = 0; i < 583; i++){
-		second_string[i] = 'b';
-	}
-	
-	tfs_mount(fs_name);
-	fd = tfs_openFile("file1");
-	fd2 = tfs_openFile("file2");
-	printf("file1: %d, file2: %d\n",fd,fd2);
-	tfs_writeFile(fd, first_string, strlen(first_string));
-	tfs_writeFile(fd2, second_string, strlen(second_string));
-	fd3 = tfs_openFile("file3");
-	tfs_writeFile(fd3, first_string, strlen(first_string));
-	tfs_readdir();
-
-	tfo_unmount();
-	return 0;
-}
-
+// 	return 0;
+// }
 
 int tfs_closeFile(fileDescriptor FD){
 	if (removeNode(list, FD)) {
@@ -851,8 +828,6 @@ int tfs_readFileInfo(fileDescriptor FD) {
 		return EREAD;
 	}
 	
-	//printf("file: %s\n", inode.filename);
-//		printf("create: %d\n", inode.cTime);
 	struct tm tm = *localtime(&inode.cTime);
 	printf("created: %d-%d-%d %d:%d:%d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 	struct tm tm1 = *localtime(&inode.aTime);
@@ -957,8 +932,14 @@ int tfs_writeByte(fileDescriptor FD, unsigned char data) {
     	return EREAD;
    	}
 
-	if (blockSize(inode.file_size) == blockSize(inode.file_pointer)) { //get new free block
+	if (blockSize(inode.file_size) == blockSize(inode.file_pointer)) { 
+		int newBlock = getFreeBlock();
 
+		file.next_block = newBlock;
+      	if (writeBlock(diskNO, block, &file) == -1) {
+         	return EWRITE;
+      	}
+      	block = newBlock;
 	}
 
 	file.buffer[offset % DATABLOCKSIZE] = data;
@@ -978,4 +959,39 @@ int tfs_writeByte(fileDescriptor FD, unsigned char data) {
    	}
 
    return SUCCESS;
+}
+
+int getFreeBlock() {
+   superblock super;
+
+   if (readBlock(diskNO, SUPERBLOCKADDR, &super) == -1) {
+      return EREAD;
+   }
+
+   if (super.free_block_count == 0) {
+      return EOUTOFMEM;
+   }
+   int free = super.free_block_pointer;
+
+   freeblock freeb;
+   if (readBlock(diskNO, free, &freeb) == -1) {
+      return EREAD;
+   }
+
+   int nextFree = freeb.next_block;
+
+   super.free_block_pointer = nextFree;
+   super.free_block_count--;
+
+   if (writeBlock(diskNO, SUPERBLOCKADDR, &super) == -1) {
+      return EWRITE;
+   }
+
+   freeb.next_block = 0;
+
+   if (writeBlock(diskNO, free, &freeb) == -1) {
+      return EWRITE;
+   }
+
+   return free;
 }

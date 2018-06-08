@@ -121,6 +121,7 @@ int find_file(char* name);
 int tfs_makeRO(char *name);
 int tfs_makeRW(char *name);
 int tfs_writeByte(fileDescriptor FD, unsigned char data); 
+int getFreeBlock();
 
 int diskNO;
 fdNode* list = NULL;
