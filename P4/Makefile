@@ -1,5 +1,5 @@
 LIBS =
-OFILES = tinyFS.o libDisk.o
+OFILES = libTinyFS.o libDisk.o
 
 #append a 32 to executable name if on a 32 bit machine
 FILE =
@@ -16,8 +16,8 @@ all:	$(FILE) fs_Sim$(FILE) cleano
 	rm -f *.o
 
 
-fs_Sim$(FILE): frontEnd.c tinyFS.o libDisk.o
-	$(CC) $(CFLAGS)-o osSim$(FILE) frontEnd.c $(OFILES) $(LIBS)
+fs_Sim$(FILE): tinyFsDemo.c libTinyFS.o libDisk.o
+	$(CC) $(CFLAGS)-o tinyFsDemo$(FILE) tinyFsDemo.c $(OFILES) $(LIBS)
 
 .c.o:
 	gcc -c $(CFLAGS) $< -o $@ $(LIBS)
@@ -26,4 +26,4 @@ cleano:
 	rm -f *.o
 
 clean:
-	rm -f osSim *.o
+	rm -f tinyFsDemo *.o

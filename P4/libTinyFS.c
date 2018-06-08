@@ -142,12 +142,8 @@ int tfs_mount(char *filename){
 	return diskNO;
 }
 
-<<<<<<< HEAD:P4/tinyFS.c
 int tfs_unmount(void){
 	//force close all open file descriptors
-=======
-int tfo_unmount(void){
->>>>>>> e6272f30dbf93ec93e50df107ac0996a91220df5:P4/libTinyFS.c
 	closeDisk(diskNO);
 	return 0;
 }
@@ -463,78 +459,6 @@ int locateFile(char *name){
 	return EFILENOTFOUND;
 }
 
-<<<<<<< HEAD:P4/tinyFS.c
-=======
- int main(){
-// 	int fs, i;
-// 	tfs_mkfs("temp",10240);
-	//testSuite1("temp");
-	// char first_string[253];
-	// for(i = 0; i < 253; i++){
-	// 	first_string[i] = 'l';
-	// }
-	// printf("%i\n",tfs_mount("temp"));
-//	printf("%i\n",tfs_mount("temp"));
-
-	// head = add(1, 7,0);
-	// head = add(2, 8,0);
-	// head = add(3, 4,0);
-	// head = add(4, 42,0);
-	// head = add(5, 42,0);
-	// head = add(6, 32,0);
-
-//	fs = tfs_openFile("hello");
-//	tfs_makeRO("hello");
-//	tfs_deleteFile(fs);
-//	tfs_makeRW("hello");
-	//printf("file_d: %d\n", fs);
-//	 tfs_openFile("tits");
-//	 tfs_openFile("asss");
-//	 tfs_openFile("niggas");
-	
-	// while (head) {
-	// 	printf("%d\n", head->blockNbr);
-	// 	head = head->next;
-	// }
-
-	//int i = tfs_writeFile(fs, "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll", 639);
-//	printf("success: %d\n", i);
-	// tfs_writeFile(fs, first_string, 254);
-	// tfs_seek(fs, 252);
-	// tfs_writeByte(fs, 'p');
-	// tfs_writeByte(fs, 'p');
-	// char a[0];
-	// tfs_seek(fs, 6);
-	// tfs_readByte(fs, a);
-	// printf("char: %s\n", a);
-	//tfs_writeFile(fs, "hello", 955);
-	//tfs_deleteFile(fs);
-	//printf("fd %d\n", fs);
-	//tfs_rename(fs, "hello2");
-	//tfr_readdir();
-//	tfs_readFileInfo(fs);
-//	tfs_rename(fs, "hello8");
-	//tfr_readdir();
-//	tfs_readFileInfo(fs);
-	//printf("address of last block %d\n", getLastFreeBlock());
-	//tfs_rename(fs, "hello");
-//	 tfs_readdir();
-	// //printf("address of last block %d\n", getLastFreeBlock());
-	// while(head != NULL) {
-	// 	printf("id: %d\n", head->data);
-	// 	head =head->next;
-	// }
-	// printf("%i\n",tfs_mount("temp"));
-
-	// fs = tfs_openFile("fucker");
-
-	// tfs_writeFile(fs, "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll", 639);
-
-	// tfs_deleteFile(fs);
- 	return 0;
- }
-
->>>>>>> e6272f30dbf93ec93e50df107ac0996a91220df5:P4/libTinyFS.c
 int tfs_closeFile(fileDescriptor FD){
 	if (removeNode(list, FD)) {
 		return SUCCESS;	
@@ -903,9 +827,6 @@ int tfs_writeByte(fileDescriptor FD, unsigned char data) {
 	if (!containsFD(list, FD)) {
 		return EFD;
 	}
-<<<<<<< HEAD:P4/tinyFS.c
-}
-=======
 
 	nbr = getBlockNbr(list, FD);
 
@@ -988,4 +909,3 @@ int getFreeBlock() {
 
    return free;
 }
->>>>>>> e6272f30dbf93ec93e50df107ac0996a91220df5:P4/libTinyFS.c

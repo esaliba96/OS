@@ -1,4 +1,4 @@
-#include "frontEnd.h"
+#include "tinyFsDemo.h"
 
 int testSuite1(char * fs_name);
 void printSuperInfo();
@@ -23,7 +23,7 @@ int testSuite1(char * fs_name){
 	for(i = 0; i < 583; i++){
 		second_string[i] = 'b';
 	}
-	printf("Mounting filesystem: %s...\n",fs_name);
+	printf("Mounting filesystem: %s...\n\n",fs_name);
 	tfs_mount(fs_name);
 	printf("Opening file: file1\n\n");
 	fd = tfs_openFile("file1");
@@ -38,7 +38,7 @@ int testSuite1(char * fs_name){
 	printf("writing string to file3 with size %d\n\n",(int)strlen(first_string));
 	tfs_writeFile(fd3, first_string, strlen(first_string));
 	printSuperInfo();
-	printf("Unmounting disk...\n");
+	printf("\nUnmounting disk...\n");
 	tfs_unmount();
 	return 0;
 }
