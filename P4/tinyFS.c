@@ -725,6 +725,8 @@ int tfs_seek(fileDescriptor FD, int offset) {
 		setOffset(list, FD, offset);
 		return SUCCESS;
 	}
+
+	return FAILURE;
 }
 
 int tfs_readByte(fileDescriptor FD, char *buffer) {
@@ -912,8 +914,51 @@ int tfs_makeRW(char *name) {
 }
 
 int tfs_writeByte(fileDescriptor FD, char* data) {
+	inodeblock inode;
+	int nbr;
+	fileData file;
+
 	if (!containsFD(list, FD)) {
 		return EFD;
 	}
 
+	nbr = getBlockNbr(list, FD);
+
+	if (readBlock(diskNO, nbr, &inode) == -1) {
+		return EREAD;
+	}
+
+	if (inode.RO == 1) {
+		printf("Cannot write to RO file: %s\n", inode.filename);
+		return FAILURE;
+	}
+	
+	int offset = getOffset(list, FD);
+	int block = getOffsetBlock(inode.file_pointer, offset);
+
+	if (readBlock(diskNO, block, &file) == -1) {
+    	return EREAD;
+   	}
+
+	if (blockSize(inode.file_size) == blockSize(inode.file_pointer)) { //get new free block
+
+	}
+
+	file.buffer[offset % DATABLOCKSIZE] = data;
+
+	if (writeBlock(diskNO, block, &file) == -1) {
+    	return EWRITE;
+   	}
+
+	offset++;
+  	setOffset(list, FD, offset);
+   
+  	inode.file_size++;
+  	inode.mTime = time(NULL);
+   
+	if (writeBlock(diskNO, nbr, &inode) == -1) {
+    	return EWRITE;
+   	}
+
+   return SUCCESS;
 }
