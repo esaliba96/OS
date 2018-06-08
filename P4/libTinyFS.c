@@ -724,7 +724,7 @@ int tfs_readdir() {
 			return EREAD;
 		}
 		if(inode.blocktype == 0x02){
-			printf("file: %s\n", inode.filename);
+			printf("\t%s\n", inode.filename);
 		}
 		head = head->next; 
 	}
