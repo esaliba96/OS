@@ -475,8 +475,8 @@ int locateFile(char *name){
 int main(){
 	int fs;
 	tfs_mkfs("temp",10240);
-	testSuite1("temp");
-	//printf("%i\n",tfs_mount("temp"));
+	//testSuite1("temp");
+	printf("%i\n",tfs_mount("temp"));
 //	printf("%i\n",tfs_mount("temp"));
 
 	// head = add(1, 7,0);
@@ -486,7 +486,7 @@ int main(){
 	// head = add(5, 42,0);
 	// head = add(6, 32,0);
 
-//	fs = tfs_openFile("hello");
+	fs = tfs_openFile("hello");
 //	tfs_makeRO("hello");
 //	tfs_deleteFile(fs);
 //	tfs_makeRW("hello");
@@ -500,8 +500,14 @@ int main(){
 	// 	head = head->next;
 	// }
 
-//	int i = tfs_writeFile(fs, "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll", 639);
+	int i = tfs_writeFile(fs, "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll", 639);
 //	printf("success: %d\n", i);
+	tfs_seek(fs, 6);
+	tfs_writeByte(fs, 'p');
+	char a[0];
+	tfs_seek(fs, 6);
+	tfs_readByte(fs, a);
+	printf("char: %s\n", a);
 	//tfs_writeFile(fs, "hello", 955);
 	//tfs_deleteFile(fs);
 	//printf("fd %d\n", fs);
