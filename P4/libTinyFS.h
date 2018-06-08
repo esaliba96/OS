@@ -107,7 +107,7 @@ int setOffset(fdNode* head, int fd, int offset);
 int getBlockNbr(fdNode* head, int fd);
 void clearBlocks(int first_block, int to_clear);
 int getFreeBlocks(int nbr, int index_free, int);
-int writeDataToFiles(int blockNbr, int head, int size, uint8_t* buffer);
+int writeDataToFiles(int blockNbr, int head, int size, char* buffer);
 int blockSize(int size);
 int getOffsetBlock(int head, int offset);
 int getOffset(fdNode* head, int fd);

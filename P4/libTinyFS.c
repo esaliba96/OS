@@ -95,17 +95,11 @@ int getBlockNbr(fdNode* head, int fd) {
 }
 
 int tfs_mkfs(char *filename, int nBytes){
-	uint8_t init= 0x0;
 	int fs;
 	int i;
-	int check;
 	int num_blocks = nBytes/BLOCKSIZE;
 	block init_block;
-	block block_list[num_blocks];
-
 	
-	//printf("%i\n",num_blocks);
-	//Initialize file system with all zeroes
 	fs = openDisk(filename,nBytes);
 	if(fs == NBYTES_ERR){
 		printf("Invalid Filesystem System Size, must be divisible by 256\n");
@@ -139,16 +133,14 @@ int tfs_mkfs(char *filename, int nBytes){
 }
 
 int tfs_mount(char *filename){
-	//initialize file descriptor memory here
-	diskNO = openDisk(filename,0);
-	if(verify_fs() == -1){
+	diskNO = openDisk(filename, 0);
+	if(verify_fs() == -1) {
 		return -1;
 	}
 	return diskNO;
 }
 
 int tfo_unmount(void){
-	//force close all open file descriptors
 	closeDisk(diskNO);
 	return 0;
 }
@@ -156,11 +148,10 @@ int tfo_unmount(void){
 int verify_fs(void){
 	block to_verify;
 	int i = 0;
-	int test=0;
-	test = readBlock(diskNO,i++,&to_verify);
+	readBlock(diskNO,i++,&to_verify);
 	int end = to_verify.buffer[4];
-	while(i<end){
-		test = readBlock(diskNO,i++,&to_verify);
+	while(i < end) {
+		readBlock(diskNO, i++, &to_verify);
 		if(to_verify.buffer[1] != 0x45){
 			return -1;
 		}
@@ -192,8 +183,7 @@ block init_blocks(int type){
 
 int tfs_openFile(char *name){
 	static int file_descriptor_bucket = 0;
-	inodeblock new_inode;
-
+	
 	int block_no;
 	if((block_no = locateFile(name))!= EFILENOTFOUND){
 		list = add(list, file_descriptor_bucket,block_no,0);
@@ -209,7 +199,6 @@ int tfs_openFile(char *name){
 }
 
 int newFile(char *name){
-	int err;
 	superblock root;
 	freeblock for_inode;
 	inodeblock new_block;
@@ -349,9 +338,7 @@ int countBlocks(int inode_addr){
 
 void clearBlocks(int first_block, int to_clear){
 	fileblock to_clear_block;
-	inodeblock temp;
 	int next = first_block;
-	int temp_addr;
 
 	while(to_clear > 0){
 		if((readBlock(diskNO, next, &to_clear_block)) == -1){ //get the current last freeblock in the list
@@ -375,10 +362,8 @@ void clearBlocks(int first_block, int to_clear){
 int getLastFreeBlock(){
 	superblock root;
 	freeblock current;
-	freeblock new;
 	int err;
 	uint8_t counter;
-	uint8_t next;
 
 	if((err = readBlock(diskNO, SUPERBLOCKADDR, &root))== -1){
 		return EREAD;
@@ -398,7 +383,7 @@ int getLastFreeBlock(){
 		}
 		counter--;
 	}
-	printf("next_block %d\n",current.next_block);
+
 	return current.next_block;
 }
 
@@ -432,18 +417,17 @@ fileblock newFileBlock(uint8_t next_block_offset){
 }
 
 uint8_t locateLastInode(){
-	int err;
 	superblock root;
 	inodeblock searcher;
 	uint8_t block_no;
 
-	err = readBlock(diskNO, SUPERBLOCKADDR, &root);
+	readBlock(diskNO, SUPERBLOCKADDR, &root);
 
 	block_no = root.root_inode;
-	err = readBlock(diskNO, block_no, &searcher);
+	readBlock(diskNO, block_no, &searcher);
 	while(searcher.next_inode != 0x00){
 		block_no = searcher.next_inode;
-		err = readBlock(diskNO, block_no, &searcher);
+		readBlock(diskNO, block_no, &searcher);
 	}
 	return block_no;
 }
@@ -563,8 +547,6 @@ int tfs_writeFile(fileDescriptor FD, char *buffer, int size) {
 		return ESIZE;
 	}
 
-	block b;
-
 	if (readBlock(diskNO, SUPERBLOCKADDR, &root) == -1) {
 		return EREAD;
 	}
@@ -663,7 +645,7 @@ int blockSize(int size) {
 	return blockSize;
 }
 
-int writeDataToFiles(int blockNbr, int head, int size, uint8_t* buffer) {
+int writeDataToFiles(int blockNbr, int head, int size, char* buffer) {
 	int i = 0;
 	fileblock file;
 	
@@ -785,10 +767,8 @@ int tfs_rename(int FD, char* new_name) {
 		return EREAD;
 	} 
 
-	//printf("size: %d\n", inode.file_size);
 	memset(inode.filename, '\0', 9*sizeof(char));
 	strcpy(inode.filename, new_name);
-	// printf("new name: %s\n", inode.filename);
 	inode.mTime = time(NULL);
 
 	if (writeBlock(diskNO, nbr, &inode) == 1) {
