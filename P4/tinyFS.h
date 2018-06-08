@@ -120,7 +120,7 @@ int testSuite1(char * fs_name);
 int find_file(char* name);
 int tfs_makeRO(char *name);
 int tfs_makeRW(char *name);
-int tfs_writeByte(fileDescriptor FD, char* data); 
+int tfs_writeByte(fileDescriptor FD, unsigned char data); 
 
 int diskNO;
 fdNode* list = NULL;

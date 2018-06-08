@@ -913,10 +913,10 @@ int tfs_makeRW(char *name) {
 	return SUCCESS;
 }
 
-int tfs_writeByte(fileDescriptor FD, char* data) {
+int tfs_writeByte(fileDescriptor FD, unsigned char data) {
 	inodeblock inode;
 	int nbr;
-	fileData file;
+	fileblock file;
 
 	if (!containsFD(list, FD)) {
 		return EFD;
@@ -932,7 +932,7 @@ int tfs_writeByte(fileDescriptor FD, char* data) {
 		printf("Cannot write to RO file: %s\n", inode.filename);
 		return FAILURE;
 	}
-	
+
 	int offset = getOffset(list, FD);
 	int block = getOffsetBlock(inode.file_pointer, offset);
 
