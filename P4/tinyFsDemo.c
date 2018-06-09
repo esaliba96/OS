@@ -55,7 +55,7 @@ int testSuite1(char * fs_name){
 int testSuite2(char *fs_name){
 	int fd1,fd2,fd3;
 	char first_string[983];
-	char list[1000];
+	char list[1];
 
 	printf("-------------------\n\nRunning TestSuite2:\n\n");
 	printf("Mounting Filesystem temp...\n\n");
@@ -69,6 +69,7 @@ int testSuite2(char *fs_name){
 	printf("\nDeleting File: file1\n\n");
 	tfs_deleteFile(fd1);
 
+	printf("Testing Seek, Read and Write:\n\n");
 	printf("Seeking to address: 37 in file2\n");
 	tfs_seek(fd2, 37);
 	printf("Writing Character: W\n\n");
@@ -91,6 +92,28 @@ int testSuite2(char *fs_name){
 	printf("Attempting to write to file2...\n");
 	tfs_writeByte(fd2, 'Q');
 	printf("\nMaking file2 Read/Write...\n\n");
+	tfs_makeRW("file2");
+
+	tfs_seek(fd2, 37);
+	tfs_readByte(fd2,list);
+	printf("Reading Byte: %c from offset 37\n\n",list[0]);
+	
+	tfs_seek(fd2, 243);
+	tfs_readByte(fd2,list);
+	printf("Reading Byte: %c from offset 243\n\n",list[0]);
+
+	tfs_seek(fd3, 89);
+	tfs_readByte(fd3,list);
+	printf("Reading Byte: %c from offset 89\n\n",list[0]);
+
+	tfs_seek(fd3, 383);
+	tfs_readByte(fd3,list);
+	printf("Reading Byte: %c from offset 383\n\n",list[0]);
+
+	printf("Deleting file2\n\n");
+	tfs_deleteFile(fd2);
+	printf("Deleting file3\n\n");
+	tfs_deleteFile(fd3);
 
 	printSuperInfo();
 	return 0;
