@@ -1,0 +1,82 @@
+Engineers: Collin Kenner and Elie Saliba
+
+
+TinyFS Functionality:
+
+File System Creation:
+	The Tiny FS we have written allocated 256 bytes blocks in the given file. All of the blocks are allocated to be free blocks except for the superblock and root inode. Mounting the file system simply makes the file accesible for reading and writing in the project.
+
+Block Structures:
+
+SuperBlock:
+	Byte1: The type of block.
+	Byte2: The magic number of the file system.
+	Byte3: The pointer to the root inode.
+	Byte4: The pointer to the first block of free memory.
+	Byte5: The number of freeblock remaining in the file system.
+	Buffer: Unused
+
+Inode:
+	Byte1: The type of Block.
+	Byte2: The magic number for the file system.
+	Byte3: The pointer to the next valid inode.
+	Byte(s)4-12: The filename of the file.
+	Byte(s)13-16: The size of the file.
+	Byte17: The pointer to the first file block.
+	Byte(s)18-25: The creation time for the file.
+	Byte(s)26-33: The last access time for the file.
+	Byte(s)34-41: The last modification time for the file.
+	Byte42: The Read/Write permission flag.
+	Buffer: Unused
+
+FileBlock:
+	Byte1: The type of Block.
+	Byte2: The magic number for the file system.
+	Byte3: The pointer to the next valid file block.
+	Buffer: Data
+
+FreeBlock:
+	Byte1: The type of Block
+	Byte2: The magic number of the file system.
+	Byte3: The pointer to the next valid free block.
+	Buffer: Unused
+
+Creating files in the file system:
+	When a file is opened in the file system the API checks whether the file already exits by scanning through the list of inodes.  If it does not find the inode then a new inode is created and added to the inode list.  No file blocks are initially allocated.
+
+Writing to files:
+	When write is called, The API checks how many file blocks are allocated to that particular inode and then allocates however many more it needs up to the limit of the memory in the system.  The data is then written to the file blocks.
+
+Free Block Management:
+	Free blocks are kept in a psuedo linked list in the file system.  Every single free block contains a pointer to the next free block in the list. Whenever a file is deleted, the inode and all file blocks are cleared, and added onto the end of the file list.  This results in a fair amount of fragmentation, but we didn't want to deal with that.
+
+Extra Functionality:
+
+Directory Listing and Renaming:
+
+	readdir():
+		This function lists the filenames of all of the files and directories currently in the system.  It does this by scanning through the list of inodes and printing the name of each file in the system.
+
+	rename():
+		This function renames a file pointed to by a given file pointer. It will not rename files specified by name. The files must first be opened.
+
+
+Read Only and Write Byte Support:
+	
+	makeRO():
+		This function takes the name of a file and makes the file read only.  If a file is made read only it cannot be written to or deleted until the file is made writable. This is done by setting the read/write permission bit to 1.
+
+	makeRW():
+		This function makes a given file be both readable and writeable by the user. This is done by setting the read/write permission bit to 0.
+	writeByte():
+		This function will write a single character to the location of the offset of the current file. The offset is stored with the file pointer and block number of the currently open file.
+
+Timestamps:
+	
+	Each file keeps the timestamps of its creation, modification, and access times. This information can be accessed manually or using the readFileInfo function.
+
+Proving it works:
+	In the testSuite(s), the behavior of a given function is specified and then the funciton is called.  After each major function is utilized, metadata functions are called which display the filesystem and file information.  This allows the user to check that the actual changes are taking place.
+
+Bugs:
+	This system was not tested for edge cases dealing with the user trying to operate outside the the amount of memory allocated for the files system.  The program was written to account for these errors, but the error checking was too much work.
