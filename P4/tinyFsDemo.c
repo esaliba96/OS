@@ -47,7 +47,7 @@ int testSuite1(char * fs_name){
 	printInodeInfo("file3");
 
 	printSuperInfo();
-	printf("\nUnmounting disk...\n");
+	printf("\nUnmounting disk...\n\n");
 	tfs_unmount();
 	return 0;
 }
@@ -55,6 +55,7 @@ int testSuite1(char * fs_name){
 int testSuite2(char *fs_name){
 	int fd1,fd2,fd3;
 	char first_string[983];
+	char list[1000];
 
 	printf("-------------------\n\nRunning TestSuite2:\n\n");
 	printf("Mounting Filesystem temp...\n\n");
@@ -67,7 +68,30 @@ int testSuite2(char *fs_name){
 
 	printf("\nDeleting File: file1\n\n");
 	tfs_deleteFile(fd1);
-	//printInodeInfo("file3");
+
+	printf("Seeking to address: 37 in file2\n");
+	tfs_seek(fd2, 37);
+	printf("Writing Character: W\n\n");
+	tfs_writeByte(fd2, 'W');
+	printf("Seeking to address: 243 in file2\n");
+	tfs_seek(fd2, 243);
+	printf("Writing Character: Z\n\n");
+	tfs_writeByte(fd2, 'Z');
+	printf("Seeking to address: 89 in file3\n");
+	tfs_seek(fd3, 89);
+	printf("Writing Character: P\n\n");
+	tfs_writeByte(fd3, 'P');
+	printf("Seeking to address: 383 in file2\n");
+	tfs_seek(fd3, 383);
+	printf("Writing Character: Q\n\n");
+	tfs_writeByte(fd3, 'Q');
+
+	printf("Making file2 Read-Only...\n\n");
+	tfs_makeRO("file2");
+	printf("Attempting to write to file2...\n");
+	tfs_writeByte(fd2, 'Q');
+	printf("\nMaking file2 Read/Write...\n\n");
+
 	printSuperInfo();
 	return 0;
 }
