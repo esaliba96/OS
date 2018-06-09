@@ -77,6 +77,3 @@ Timestamps:
 
 Proving it works:
 	In the testSuite(s), the behavior of a given function is specified and then the funciton is called.  After each major function is utilized, metadata functions are called which display the filesystem and file information.  This allows the user to check that the actual changes are taking place.
-
-Bugs:
-	This system was not tested for edge cases dealing with the user trying to operate outside the the amount of memory allocated for the files system.  The program was written to account for these errors, but the error checking was too much work.
