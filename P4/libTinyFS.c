@@ -24,6 +24,21 @@ fdNode* add(fdNode* head, int data, uint8_t blockNbr, uint64_t offset) {
     return head;
 }
 
+int hasFile(char *name){
+	inodeblock block;
+	int i;
+	readBlock(diskNO,ROOTINODEADDR,&block);
+	while(block.blocktype == 0x02) {
+		if (strcmp(block.filename,name) == 0) {
+			return i;
+		}
+		i = block.next_inode; 
+		readBlock(diskNO,block.next_inode,&block);
+
+	}
+	return -1;
+}
+
 int removeNode(fdNode* head, int data) {
 	fdNode *curr, *prev;
   	prev = NULL;
