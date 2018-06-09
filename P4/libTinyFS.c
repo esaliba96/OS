@@ -464,7 +464,7 @@ int locateFile(char *name){
 	block_no = root.root_inode;
 	err = readBlock(diskNO, block_no, &searcher);
 
-	while(searcher.next_inode != 0x00){
+	while(searcher.blocktype == 0x02){
 		if(strcmp(name,searcher.filename) == 0){
 			return block_no;
 		}
@@ -732,8 +732,12 @@ int tfs_readdir() {
 	inodeblock inode;
 	fdNode * head = list;
 
-	while(head != NULL) {
-		nbr = getBlockNbr(list, head->data);
+	if (readBlock(diskNO, ROOTINODEADDR, &inode) == -1) {
+			return EREAD;
+	}
+
+	while(inode.blocktype == 0x02) {
+		nbr = inode.next_inode;
 
 		if (readBlock(diskNO, nbr, &inode) == -1) {
 			return EREAD;
@@ -741,7 +745,6 @@ int tfs_readdir() {
 		if(inode.blocktype == 0x02){
 			printf("\t%s\n", inode.filename);
 		}
-		head = head->next; 
 	}
 
 	return SUCCESS;

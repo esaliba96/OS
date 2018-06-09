@@ -1,3 +1,5 @@
+CC= gcc
+CFLAGS= -g
 LIBS =
 OFILES = libTinyFS.o libDisk.o
 
@@ -17,10 +19,10 @@ all:	$(FILE) fs_Sim$(FILE) cleano
 
 
 fs_Sim$(FILE): tinyFsDemo.c libTinyFS.o libDisk.o
-	$(CC) $(CFLAGS)-o tinyFsDemo$(FILE) tinyFsDemo.c $(OFILES) $(LIBS)
+	$(CC) $(CFLAGS) -o tinyFsDemo$(FILE) tinyFsDemo.c $(OFILES) $(LIBS)
 
 .c.o:
-	gcc -c $(CFLAGS) $< -o $@ $(LIBS)
+	gcc  -g -c $(CFLAGS) $< -o $@ $(LIBS)
 
 cleano:
 	rm -f *.o
